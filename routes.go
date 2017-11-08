@@ -23,19 +23,31 @@ var routes = Routes {
 	Route{
 		"Teams",
 		"GET",
-		"/teams",
+		"/api/teams",
 		teamsHandler,
 	},
 	Route{
 		"Team",
 		"GET",
-		"/teams/{teamId}",
+		"/api/teams/{teamId}",
 		teamHandler,
 	},
 	Route{
 		"TeamCreate",
 		"POST",
-		"/teams",
-		teamCreate,
+		"/api/teams",
+		teamCreateHandler,
+	},
+	Route{
+		"DeleteTeam",
+		"DELETE",
+		"/api/teams/{teamId}",
+		teamDeleteHandler,
+	},
+	Route{
+		"UpdateTeam",
+		"PUT",
+		"/api/teams/{teamId}",
+		teamUpdateHandler,
 	},
 }

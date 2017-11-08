@@ -52,7 +52,7 @@ func teamsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func teamCreate(w http.ResponseWriter, r *http.Request){
+func teamCreateHandler(w http.ResponseWriter, r *http.Request){
 	
 	var team Models.Team
 
@@ -72,7 +72,14 @@ func teamCreate(w http.ResponseWriter, r *http.Request){
 	
 	t := Models.CreateTeam(team)
     w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-    w.WriteHeader(http.StatusCreated)
+	w.WriteHeader(http.StatusCreated)
+	// url, err := r.URL
+	// if err != nil {
+	// 	panic(err)
+	// }
+
+	fmt.Println(r.URL.String())
+	w.Header().Set("X-Frame-Options", "soooo" )
     if err := json.NewEncoder(w).Encode(t); err != nil {
         http.Error(w, err.Error(), 500)
 		return
@@ -81,8 +88,80 @@ func teamCreate(w http.ResponseWriter, r *http.Request){
 	if err := r.Body.Close(); err != nil {
         panic(err)
 	}
+
+	
 }
 
+func teamDeleteHandler(w http.ResponseWriter, r *http.Request){
+
+	vars := mux.Vars(r)
+	teamId := vars["teamId"]
+
+	w.Header().Set("Content-Type", "application/json;charset=UTF-8")
+
+	if !IsValidUUID(teamId) {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	err := Models.DeleteTeam(teamId)
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+	}
+	w.WriteHeader(http.StatusOK)
+
+	if err := json.NewEncoder(w).Encode(Models.GetTeamsList()); err != nil {
+        http.Error(w, err.Error(), 500)
+		return
+	}
+}
+
+func teamUpdateHandler(w http.ResponseWriter, r *http.Request){
+
+	vars := mux.Vars(r)
+	teamId := vars["teamId"]
+
+	w.Header().Set("Content-Type", "application/json;charset=UTF-8")
+
+	if !IsValidUUID(teamId) {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	var team Models.Team
+
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+	}
+
+	if err := r.Body.Close(); err != nil {
+        panic(err)
+	}
+
+	if err := json.Unmarshal(body, &team); err != nil {
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		w.WriteHeader(http.StatusBadRequest) // unprocessable entity
+		if err := json.NewEncoder(w).Encode(err); err != nil {
+			http.Error(w, err.Error(), 500)
+			return
+		}
+	}
+
+	t := Models.UpdateTeam(teamId, team)
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	// url, err := r.URL
+	// if err != nil {
+	// 	panic(err)
+	// }
+	w.Header().Set("Location", r.URL.String())
+    w.WriteHeader(http.StatusOK)
+    if err := json.NewEncoder(w).Encode(t); err != nil {
+        http.Error(w, err.Error(), 500)
+		return
+	}
+
+}
 
 func cyclistsHandler(w http.ResponseWriter, r *http.Request) {
 }

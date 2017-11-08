@@ -1,6 +1,7 @@
 package models
 
 
+import "errors"
 
 import (
 	"fmt"
@@ -56,7 +57,7 @@ func GetTeam(id string) Team {
 	return t
 }
 
-func UpdateTeam(uid string, t Team) Team{
+func UpdateTeam(uid string, t Team) Team {
 
 	updateTeam, ind := FindTeam(uid)
 
@@ -67,15 +68,15 @@ func UpdateTeam(uid string, t Team) Team{
 	updateTeam.Manager.Phone = t.Manager.Phone
 	updateTeam.Manager.Nationality = t.Manager.Nationality
 
-	teams[index] = updateTeam
+	teams[ind] = updateTeam
 
 	return updateTeam
 }
 
-func DeleteTeam(uid string) {
+func DeleteTeam(uid string) error {
 
-	var delete int 
-	u2, err :=  uuid.FromString(id)
+	delete := -1
+	u2, err :=  uuid.FromString(uid)
 	if err != nil{
 		fmt.Errorf("Error occured while parsing uuid %v", err)	
 	}
@@ -86,7 +87,12 @@ func DeleteTeam(uid string) {
 		}
 	}
 
-	teams = append(teams[:delete], teams[delete+1:])
+	if delete != -1{
+		teams = append(teams[:delete], teams[delete + 1:]...)
+		return nil
+	}
+
+	return errors.New("Could not find team")
 }
 
 func FindTeam(id string) (Team, int) {
