@@ -1,8 +1,0 @@
-{
-  "Host": "ds111066.mlab.com:11066",
-  "Port": 11066,
-  "Timeout": 60,
-  "Database": "toyger",
-  "Username": "admin",
-  "Password": "toyger2017"
-}
