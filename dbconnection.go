@@ -38,5 +38,5 @@ func connection() (*mgo.Session){
 		log.Fatalf("CreateSession: %s\n", err)
 	}
 
-	return mongoSession
+	return mongoSession.Clone()
 }

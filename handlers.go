@@ -31,7 +31,7 @@ func TeamHandler (w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	team := Models.GetTeam(teamID)
+	team := Models.GetTeam(teamID, connection())
 	w.WriteHeader(http.StatusOK)
 
 	if err := json.NewEncoder(w).Encode(team); err != nil {
@@ -44,7 +44,7 @@ func TeamsHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json;charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
-	if err := json.NewEncoder(w).Encode(Models.GetTeamsList()); err != nil {
+	if err := json.NewEncoder(w).Encode(Models.GetTeamsList(connection())); err != nil {
 		panic(err)
 	}
 }
@@ -68,7 +68,7 @@ func TeamCreateHandler(w http.ResponseWriter, r *http.Request){
         }
 	}
 	
-	t := Models.CreateTeam(team)
+	t := Models.CreateTeam(team, connection())
     w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusCreated)
 
@@ -99,13 +99,13 @@ func TeamDeleteHandler(w http.ResponseWriter, r *http.Request){
 		return
 	}
 
-	err := Models.DeleteTeam(teamID)
+	err := Models.DeleteTeam(teamID, connection())
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 	}
 	w.WriteHeader(http.StatusOK)
 
-	if err := json.NewEncoder(w).Encode(Models.GetTeamsList()); err != nil {
+	if err := json.NewEncoder(w).Encode(Models.GetTeamsList(connection())); err != nil {
         http.Error(w, err.Error(), 500)
 		return
 	}
@@ -143,7 +143,7 @@ func TeamUpdateHandler(w http.ResponseWriter, r *http.Request){
 		}
 	}
 
-	t := Models.UpdateTeam(teamID, team)
+	t := Models.UpdateTeam(teamID, team, connection())
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
 	w.Header().Set("Location", r.URL.String())
