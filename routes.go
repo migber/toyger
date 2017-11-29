@@ -58,31 +58,31 @@ var routes = Routes {
 	Route{
 		"Cyclists",
 		"GET",
-		"/api/cyclists",
+		"/api/teams/{teamId}/cyclists",
 		CyclistsHandler,
 	},
 	Route{
 		"Cyclist",
 		"GET",
-		"/api/cyclists/{cyclistId}",
+		"/api/teams/{teamId}/cyclists/{cyclistId}",
 		CyclistHandler,
 	},
 	Route{
 		"CyclistCreate",
 		"POST",
-		"/api/cyclists",
+		"/api/teams/{teamId}/cyclists",
 		CyclistCreateHandler,
 	},
 	Route{
 		"CyclistDelete",
 		"DELETE",
-		"/api/cyclists/{cyclistId}",
+		"/api/teams/{teamId}/cyclists/{cyclistId}",
 		CyclistDeleteHandler,
 	},
 	Route{
 		"CyclistUpdate",
 		"PUT",
-		"/api/cyclists/{cyclistId}",
+		"/api/teams/{teamId}/cyclists/{cyclistId}",
 		CyclistUpdateHandler,
 	},
 

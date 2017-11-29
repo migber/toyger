@@ -19,7 +19,7 @@ func Hanlder(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Hello, %q", html.EscapeString(r.URL.Path))
 }
 // TeamHandler return one team handler
-func TeamHandler (w http.ResponseWriter, r *http.Request) {
+func TeamHandler(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
 	teamID := vars["teamId"]
@@ -53,12 +53,10 @@ func TeamsHandler(w http.ResponseWriter, r *http.Request) {
 func TeamCreateHandler(w http.ResponseWriter, r *http.Request){
 	
 	var team Models.Team
-
    	body, err := ioutil.ReadAll(r.Body)
     if err != nil {
 		http.Error(w, err.Error(), 500)
 	}
-
     if err := json.Unmarshal(body, &team); err != nil {
         w.Header().Set("Content-Type", "application/json; charset=UTF-8")
         w.WriteHeader(http.StatusBadRequest) // unprocessable entity
@@ -67,7 +65,6 @@ func TeamCreateHandler(w http.ResponseWriter, r *http.Request){
 			return
         }
 	}
-	
 	t := Models.CreateTeam(team, connection())
     w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusCreated)
@@ -82,8 +79,6 @@ func TeamCreateHandler(w http.ResponseWriter, r *http.Request){
 	if err := r.Body.Close(); err != nil {
         panic(err)
 	}
-
-	
 }
 
 // TeamDeleteHandler team delete handler
@@ -152,27 +147,168 @@ func TeamUpdateHandler(w http.ResponseWriter, r *http.Request){
         http.Error(w, err.Error(), 500)
 		return
 	}
-
 }
 
-// CyclistsHandler handler cyclists
+// CyclistsHandler handler cyclists return cyclists
 func CyclistsHandler(w http.ResponseWriter, r *http.Request) {
+
+	vars := mux.Vars(r)
+	teamID := vars["teamId"]
+
+	w.Header().Set("Content-Type", "application/json;charset=UTF-8")
+	w.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(w).Encode(Models.GetCyclistsList(teamID, connection())); err != nil {
+		panic(err)
+	}
 }
 
-//CyclistHandler handler cyclist
+//CyclistHandler handler cyclist return on cyclist
 func CyclistHandler(w http.ResponseWriter, r *http.Request) {
+
+	vars := mux.Vars(r)
+	teamID := vars["teamId"]
+	cyclistID := vars["cyclistId"]
+
+	w.Header().Set("Content-Type", "application/json;charset=UTF-8")
+
+	if !IsValidUUID(teamID) {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	if !isValidUCIID(cyclistID){
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	cyclist := Models.GetCyclist(teamID, cyclistID, connection())
+	w.WriteHeader(http.StatusOK)
+
+	if err := json.NewEncoder(w).Encode(cyclist); err != nil {
+        http.Error(w, err.Error(), 500)
+		return
+	}
 }
 
 //CyclistCreateHandler handler create cyclist
 func CyclistCreateHandler(w http.ResponseWriter, r *http.Request) {
+	
+	vars := mux.Vars(r)
+	teamID := vars["teamId"]
+	var cyclist Models.Cyclist
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+	}
+
+	if err := json.Unmarshal(body, &cyclist); err != nil {
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		w.WriteHeader(http.StatusBadRequest) // unprocessable entity
+		if err := json.NewEncoder(w).Encode(err); err != nil {
+			http.Error(w, err.Error(), 500)
+			return
+		}
+	}
+	
+	c := Models.CreateCyclist(teamID, cyclist, connection())
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	if c.UCIID == ""{
+		w.WriteHeader(http.StatusConflict)
+	} else {
+		w.WriteHeader(http.StatusOK)	
+		updateErr := Models.InsertRider(teamID, c.UCIID, connection())
+		if updateErr != nil {
+			fmt.Println("Something went wrong.")
+		}
+		if err := json.NewEncoder(w).Encode(c); err != nil {
+			http.Error(w, err.Error(), 500)
+			return
+		}
+	}
+	
+	fmt.Println(r.URL.String())
+	//w.Header().Set("X-Frame-Options", "soooo" )
+	if err := r.Body.Close(); err != nil {
+		panic(err)
+	}
 }
 
 //CyclistUpdateHandler handler update cyclist
 func CyclistUpdateHandler(w http.ResponseWriter, r *http.Request) {
+
+	vars := mux.Vars(r)
+	teamID := vars["teamId"]
+	cyclistID := vars["cyclistId"]
+	w.Header().Set("Content-Type", "application/json;charset=UTF-8")
+
+	if !IsValidUUID(teamID) {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	if !isValidUCIID(cyclistID){
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	var cyclist Models.Cyclist
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+	}
+	if err := r.Body.Close(); err != nil {
+        panic(err)
+	}
+
+	if err := json.Unmarshal(body, &cyclist); err != nil {
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		w.WriteHeader(http.StatusBadRequest) // unprocessable entity
+		if err := json.NewEncoder(w).Encode(err); err != nil {
+			http.Error(w, err.Error(), 500)
+			return
+		}
+	}
+
+	c := Models.UpdateCyclist(teamID, cyclistID, cyclist, connection())
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+
+	w.Header().Set("Location", r.URL.String())
+    w.WriteHeader(http.StatusOK)
+    if err := json.NewEncoder(w).Encode(c); err != nil {
+        http.Error(w, err.Error(), 500)
+		return
+	}
 }
 
 //CyclistDeleteHandler handler delete cyclist
 func CyclistDeleteHandler(w http.ResponseWriter, r *http.Request) {
+	
+	vars := mux.Vars(r)
+	teamID := vars["teamId"]
+	cyclistID := vars["cyclistId"]
+	w.Header().Set("Content-Type", "application/json;charset=UTF-8")
+
+	if !IsValidUUID(teamID) {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	if !isValidUCIID(cyclistID){
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	err := Models.DeleteCyclist(teamID, cyclistID, connection())
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+	}
+	err = Models.DeleteRider(teamID, cyclistID, connection())
+	if err != nil{
+		fmt.Println(fmt.Errorf("%s", err))
+	}
+	w.WriteHeader(http.StatusOK)
+
+	if err := json.NewEncoder(w).Encode(Models.GetCyclistsList(teamID, connection())); err != nil {
+        http.Error(w, err.Error(), 500)
+		return
+	}
 }
 
 

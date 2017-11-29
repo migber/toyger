@@ -25,13 +25,11 @@ type Manager struct {
 
 type Teams []Team
 
-var team Team
-var teams Teams
-var DATABASE = "toyger"
 var NAME = "teams"
 
 func CreateTeam(t Team, session *mgo.Session) Team {
 
+	var team Team
 	defer session.Close() 
 
 	t.Id = uuid.NewV4().String()
@@ -45,7 +43,6 @@ func CreateTeam(t Team, session *mgo.Session) Team {
 	if err := collection.Insert(team); err != nil {
 		panic(err)
 	}
-	//teams = append(teams, team)
 	return t
 }
 
@@ -70,28 +67,24 @@ func GetTeam(id string, session *mgo.Session) Team {
 	if err != nil {
 		panic(err)
 	}
+	fmt.Println(t)
 
 	return t
 }
 
 func UpdateTeam(uid string, t Team, session *mgo.Session) Team {
 
-	// updateTeam, ind := FindTeam(uid)
+	var updateT Team
 
-	// updateTeam.Name = t.Name
-	// updateTeam.Manager.Name = t.Manager.Name
-	// updateTeam.Manager.Surname = t.Manager.Surname
-	// updateTeam.Manager.Birthdate = t.Manager.Birthdate
-	// updateTeam.Manager.Phone = t.Manager.Phone
-	// updateTeam.Manager.Nationality = t.Manager.Nationality
 	defer session.Close()
 	
 	collection := session.DB(DATABASE).C(NAME)
-	var updateT Team
+
 	err := collection.Find(bson.M{"id": uid}).One(&updateT)
 	if err != nil {
 		panic(err)
 	}
+
 	updateT.Name = t.Name
 	updateT.Manager.Name = t.Manager.Name
 	updateT.Manager.Surname = t.Manager.Surname
@@ -103,29 +96,14 @@ func UpdateTeam(uid string, t Team, session *mgo.Session) Team {
 	if err := collection.Update(bson.M{"id": uid}, updateT); err != nil {
 		panic(err)
 	}
-	//teams[ind] = updateTeam
 	
 	return updateT
 }
 
 func DeleteTeam(uid string, session *mgo.Session) error {
 
-	// delete := -1
-	//u2, err :=  uuid.FromString(uid)
-	// if err != nil{
-	// 	fmt.Errorf("Error occured while parsing uuid %v", err)	
-	// // }
-
-	// for ind, team := range teams {
-	// 	if team.Id == uid {
-	// 		delete = ind
-	// 	}
-	// }
-
-	// if delete != -1{
-	// 	teams = append(teams[:delete], teams[delete + 1:]...)
-	// 	return nil
-	// }
+	defer session.Close()
+	
 	collection := session.DB(DATABASE).C(NAME)
 	err := collection.Remove(bson.M{"id": uid})
 	if err != nil {
@@ -136,20 +114,62 @@ func DeleteTeam(uid string, session *mgo.Session) error {
 	return err
 }
 
-func FindTeam(id string) (Team, int) {
+ func FindCyclist(riders []string, id string) int {
 
-	var t Team
 	var index int
-	//u2, err :=  uuid.FromString(id)
-	// if err != nil{
-	// 	fmt.Errorf("Error occured while parsing uuid %v", err)	
-	// }
-
-	for ind, team := range teams {
-		if team.Id == id {
-			t = team
+	for ind, cyclist := range riders {
+		if cyclist == id {
 			index = ind
 		}
 	}
-	return t, index
+	return index
+}
+
+func InsertRider(id string, riderId string, session *mgo.Session) error {
+
+	var updatedTeam Team
+	defer session.Close()
+	
+	collection := session.DB(DATABASE).C(NAME)
+	err := collection.Find(bson.M{"id": id}).One(&updatedTeam)
+	if err != nil {
+		return err
+	}
+	riders := updatedTeam.Riders
+	newRiders := append(riders, riderId)
+	updatedTeam.Riders = newRiders
+	if err := collection.Update(bson.M{"id": id}, updatedTeam); err != nil {
+		return err
+	}
+	return nil
+}
+
+func DeleteRider(id string, riderId string, session *mgo.Session) error{
+
+	var updatedTeam Team
+	var emptyRiders []string
+	defer session.Close()
+	
+	collection := session.DB(DATABASE).C(NAME)
+	err := collection.Find(bson.M{"id": id}).One(&updatedTeam)
+	if err != nil {
+		fmt.Println(err)
+	}
+	riders := updatedTeam.Riders
+	index := FindCyclist(riders, riderId)
+	fmt.Println(index)
+	if (len(riders) == 1 && index == 0){
+		updatedTeam.Riders = emptyRiders
+	} else {
+		newRiders := append(riders[:index], riders[index+1:]...)
+		updatedTeam.Riders = newRiders
+	}
+	newRiders := append(riders[:index], riders[index+1:]...)
+	updatedTeam.Riders = newRiders
+	if err := collection.Update(bson.M{"id": id}, updatedTeam); err != nil {
+		fmt.Println(err)
+		return err
+	} else {
+		return nil
+	}
 }
