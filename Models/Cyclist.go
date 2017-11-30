@@ -25,30 +25,30 @@ var CYCLISTS = "cyclists"
 
 func CreateCyclist(teamId string, c Cyclist, session *mgo.Session) Cyclist {
 	
-		var cyclist Cyclist
-		defer session.Close() 
+	var cyclist Cyclist
+	defer session.Close() 
 
-		existsCyclist := GetCyclistInside(teamId, c.UCIID, session)
-		fmt.Println(existsCyclist)
-		if existsCyclist != nil {
-			cyclist.UCIID = c.UCIID
-			cyclist.Name = c.Name
-			cyclist.Surname = c.Surname
-			cyclist.Team = teamId
-			cyclist.Coaches = c.Coaches
-			cyclist.Birthdate = c.Birthdate
-			cyclist.Gender = c.Gender
-			cyclist.UCICategory = c.UCICategory
-			cyclist.Nationality = c.Nationality
-			
-			collection := session.DB(DATABASE).C(CYCLISTS)
-			if err := collection.Insert(cyclist); err != nil {
-				panic(err)
-			}
-		} else {
-			fmt.Println("User with the same UCIID exists")
+	existsCyclist := GetCyclistInside(teamId, c.UCIID, session)
+	fmt.Println(existsCyclist)
+	if existsCyclist != nil {
+		cyclist.UCIID = c.UCIID
+		cyclist.Name = c.Name
+		cyclist.Surname = c.Surname
+		cyclist.Team = teamId
+		cyclist.Coaches = c.Coaches
+		cyclist.Birthdate = c.Birthdate
+		cyclist.Gender = c.Gender
+		cyclist.UCICategory = c.UCICategory
+		cyclist.Nationality = c.Nationality
+		
+		collection := session.DB(DATABASE).C(CYCLISTS)
+		if err := collection.Insert(cyclist); err != nil {
+			panic(err)
 		}
-		return cyclist
+	} else {
+		fmt.Println("User with the same UCIID exists")
+	}
+	return cyclist
 }
 
 func GetCyclistsList(teamId string, session *mgo.Session) Cyclists {
@@ -92,8 +92,6 @@ func GetCyclistInside(teamId string, id string, session *mgo.Session) error {
 func UpdateCyclist(teamId string, uid string, c Cyclist, session *mgo.Session) Cyclist {
 	
 		var updateC Cyclist
-		fmt.Println(c)
-	
 		defer session.Close()
 		
 		collection := session.DB(DATABASE).C(CYCLISTS)

@@ -16,7 +16,7 @@ type Event struct {
 	Location 		string				`json:"location"`
 	NoCommissaires 	int 				`json:"no_commissaires"`
 	TotalKm 		int					`json:"total_km"`
-	Stages			[]string		    `json:"stages"`
+	Stages			[]int		        `json:"stages"`
 	Participants	[]string		    `json:"participants"`
 	Commissaires	[]string	        `json:"commissaires"`
 }
@@ -133,7 +133,7 @@ func FindEventsParticipant(riders []string, id string) int {
 	return index
 }
 
-func FindEventStage(stages []string, id string) int {
+func FindEventStage(stages []int, id int) int {
 	
 	var index int
 	for ind, stage := range stages {
@@ -193,7 +193,7 @@ func InsertEventCommissaire(id string, comId string, session *mgo.Session) error
 	return nil
 }
 
-func InsertEventStages(id string, stageId string, session *mgo.Session) error {
+func InsertEventStages(id string, stageId int, session *mgo.Session) error {
 	
 	var updatedEvent Event
 	defer session.Close()
@@ -272,10 +272,10 @@ func DeleteEventCommissaire(id string, comId string, session *mgo.Session) error
 	}
 }
 
-func DeleteEventStages(id string, stageId string, session *mgo.Session) error{
+func DeleteEventStage(id string, stageId int, session *mgo.Session) error{
 	
 	var updateEvent Event
-	var emptyStage []string
+	var emptyStage []int
 	defer session.Close()
 	
 	collection := session.DB(DATABASE).C(EVENTS)

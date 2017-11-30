@@ -6,6 +6,7 @@ import (
     "fmt"
 	"net/http"
 	"io/ioutil"
+	"strconv"
 	"html"
 	Models "toyger/models"
 	m "toyger/models/events"
@@ -629,18 +630,161 @@ func ParticipantUpdateHandler(w http.ResponseWriter, r *http.Request) {
 
 // StagesHandler handler stages information
 func StagesHandler(w http.ResponseWriter, r *http.Request) {
+	
+	vars := mux.Vars(r)
+	eventId := vars["eventId"]
+
+	w.Header().Set("Content-Type", "application/json;charset=UTF-8")
+	w.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(w).Encode(m.GetStageList(eventId, connection())); err != nil {
+		panic(err)
+	}
 }
 // StageHandler handler stage information 
 func StageHandler(w http.ResponseWriter, r *http.Request) {
+	
+	vars := mux.Vars(r)
+	eventId := vars["eventId"]
+	stageId := vars["stageId"]
+
+	w.Header().Set("Content-Type", "application/json;charset=UTF-8")
+
+	if !IsValidUUID(eventId) {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	intStageId, _ := strconv.Atoi(stageId)
+	if !IsValidStageId(intStageId){
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	stage := m.GetStage(eventId, intStageId, connection())
+	w.WriteHeader(http.StatusOK)
+
+	if err := json.NewEncoder(w).Encode(stage); err != nil {
+        http.Error(w, err.Error(), 500)
+		return
+	}
 }
 // StageCreateHandler handler create stage information 
 func StageCreateHandler(w http.ResponseWriter, r *http.Request) {
+	
+	vars := mux.Vars(r)
+	eventId := vars["eventId"]
+	var stage m.Stage
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+	}
+
+	if err := json.Unmarshal(body, &stage); err != nil {
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		w.WriteHeader(http.StatusBadRequest) // unprocessable entity
+		if err := json.NewEncoder(w).Encode(err); err != nil {
+			http.Error(w, err.Error(), 500)
+			return
+		}
+	}
+	
+	s := m.CreateStage(eventId, stage, connection())
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	if strconv.Itoa(s.ID) == ""{
+		w.WriteHeader(http.StatusConflict)
+	} else {
+		w.WriteHeader(http.StatusOK)	
+		updateErr := m.InsertEventStages(eventId, s.ID, connection())
+		if updateErr != nil {
+			fmt.Println("Something went wrong.")
+		}
+		if err := json.NewEncoder(w).Encode(s); err != nil {
+			http.Error(w, err.Error(), 500)
+			return
+		}
+	}
+	
+	fmt.Println(r.URL.String())
+	if err := r.Body.Close(); err != nil {
+		panic(err)
+	}
 }
 // StageDeleteHandler handler delete stage
 func StageDeleteHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	eventId := vars["eventId"]
+	stageId := vars["stageId"]
+	w.Header().Set("Content-Type", "application/json;charset=UTF-8")
+
+	if !IsValidUUID(eventId) {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	intStageId, _ := strconv.Atoi(stageId)
+	if !IsValidStageId(intStageId){
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	err := m.DeleteStage(eventId, intStageId, connection())
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+	}
+	err = m.DeleteEventStage(eventId, intStageId, connection())
+	if err != nil{
+		fmt.Println(fmt.Errorf("%s", err))
+	}
+	w.WriteHeader(http.StatusOK)
+
+	if err := json.NewEncoder(w).Encode(m.GetStageList(eventId, connection())); err != nil {
+        http.Error(w, err.Error(), 500)
+		return
+	}
 }
 // StageUpdateHandler handler update stage information 
 func StageUpdateHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	eventId := vars["eventId"]
+	stageId := vars["stageId"]
+	w.Header().Set("Content-Type", "application/json;charset=UTF-8")
+
+	if !IsValidUUID(eventId) {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	intStageId, _ := strconv.Atoi(stageId)
+	if !IsValidStageId(intStageId){
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	var stage m.Stage
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+	}
+	if err := r.Body.Close(); err != nil {
+        panic(err)
+	}
+
+	if err := json.Unmarshal(body, &stage); err != nil {
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		w.WriteHeader(http.StatusBadRequest) // unprocessable entity
+		if err := json.NewEncoder(w).Encode(err); err != nil {
+			http.Error(w, err.Error(), 500)
+			return
+		}
+	}
+
+	s := m.UpdateStage(eventId, intStageId, stage, connection())
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+
+	w.Header().Set("Location", r.URL.String())
+    w.WriteHeader(http.StatusOK)
+    if err := json.NewEncoder(w).Encode(s); err != nil {
+        http.Error(w, err.Error(), 500)
+		return
+	}
 }
 
 // SprintsHandler handler sprints information

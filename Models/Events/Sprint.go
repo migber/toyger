@@ -10,3 +10,5 @@ type Sprint struct {
 }
 
 type Sprints []Sprint
+var SPRINTS = "sprints"
+

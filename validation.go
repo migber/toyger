@@ -15,3 +15,11 @@ func isValidUCIID(uid string) bool {
         return false
     }
 }
+
+func IsValidStageId(id int) bool {
+    if (id > 0 && id < 30){
+        return true
+    } else {
+        return false
+    }
+}
