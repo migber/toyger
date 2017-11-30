@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"html"
 	Models "toyger/models"
+	m "toyger/models/events"
 	"github.com/gorilla/mux"
 )
 // HealtchCheck handler
@@ -315,21 +316,139 @@ func CyclistDeleteHandler(w http.ResponseWriter, r *http.Request) {
 
 // CommissairesHandler handler commissaires
 func CommissairesHandler(w http.ResponseWriter, r *http.Request) {
+	
+	w.Header().Set("Content-Type", "application/json;charset=UTF-8")
+	w.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(w).Encode(Models.GetCommissairesList(connection())); err != nil {
+		panic(err)
+	}
 }
 
 // CommissaireHandler handler commissaire information
 func CommissaireHandler(w http.ResponseWriter, r *http.Request) {
+	
+	vars := mux.Vars(r)
+	comId := vars["commissaireId"]
+	fmt.Println(comId)
+
+	w.Header().Set("Content-Type", "application/json;charset=UTF-8")
+
+	if !isValidUCIID(comId) {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	commissaire := Models.GetCommissaire(comId, connection())
+	w.WriteHeader(http.StatusOK)
+
+	if err := json.NewEncoder(w).Encode(commissaire); err != nil {
+        http.Error(w, err.Error(), 500)
+		return
+	}
 }
 
 // CommissaireCreateHandler handler create commissaire
 func CommissaireCreateHandler(w http.ResponseWriter, r *http.Request) {
+	
+	var commissaire Models.Commissaire
+	body, err := ioutil.ReadAll(r.Body)
+ 	if err != nil {
+	 	http.Error(w, err.Error(), 500)
+ 	}
+ 	if err := json.Unmarshal(body, &commissaire); err != nil {
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	 	w.WriteHeader(http.StatusBadRequest) // unprocessable entity
+	 	if err := json.NewEncoder(w).Encode(err); err != nil {
+			 http.Error(w, err.Error(), 500)
+			 return
+			}
+		}
+	fmt.Println(commissaire.UCIID)
+	if !isValidUCIID(commissaire.UCIID) {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	c := Models.CreateCommissaire(commissaire, connection())
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	if c.UCIID == "" {
+		w.WriteHeader(http.StatusConflict)
+	} else {
+		w.WriteHeader(http.StatusCreated)	
+	}
+	fmt.Println(r.URL.String())
+	if err := json.NewEncoder(w).Encode(c); err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+	if err := r.Body.Close(); err != nil {
+		panic(err)
+	}
 }
 
 // CommissaireUpdateHandler handler update commissaire information
 func CommissaireUpdateHandler(w http.ResponseWriter, r *http.Request) {
+	
+	vars := mux.Vars(r)
+	comId := vars["commissaireId"]
+	
+	w.Header().Set("Content-Type", "application/json;charset=UTF-8")
+
+	if !isValidUCIID(comId) {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	var commissaire Models.Commissaire
+
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+	}
+
+	if err := r.Body.Close(); err != nil {
+        panic(err)
+	}
+
+	if err := json.Unmarshal(body, &commissaire); err != nil {
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		w.WriteHeader(http.StatusBadRequest) // unprocessable entity
+		if err := json.NewEncoder(w).Encode(err); err != nil {
+			http.Error(w, err.Error(), 500)
+			return
+		}
+	}
+	c := Models.UpdateCommissaire(comId, commissaire, connection())
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+
+	w.Header().Set("Location", r.URL.String())
+    w.WriteHeader(http.StatusOK)
+    if err := json.NewEncoder(w).Encode(c); err != nil {
+        http.Error(w, err.Error(), 500)
+		return
+	}
 }
 // CommissaireDeleteHandler handler delete commissaires
 func CommissaireDeleteHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	comId := vars["commissaireId"]
+
+	w.Header().Set("Content-Type", "application/json;charset=UTF-8")
+
+	if !isValidUCIID(comId) {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	err := Models.DeleteCommissaire(comId, connection())
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+	}
+	w.WriteHeader(http.StatusOK)
+
+	if err := json.NewEncoder(w).Encode(Models.GetCommissairesList(connection())); err != nil {
+        http.Error(w, err.Error(), 500)
+		return
+	}
 }
 
 
@@ -360,22 +479,134 @@ func ManagerDeleteHandler(w http.ResponseWriter, r *http.Request) {
 
 // EventsHandler handler events information
 func EventsHandler(w http.ResponseWriter, r *http.Request) {
+
+	w.Header().Set("Content-Type", "application/json;charset=UTF-8")
+	w.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(w).Encode(m.GetEventsList(connection())); err != nil {
+		panic(err)
+	}
 }
 
 // EventHandler handler event information
 func EventHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	eventId := vars["eventId"]
+
+	w.Header().Set("Content-Type", "application/json;charset=UTF-8")
+
+	if !IsValidUUID(eventId) {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	event := m.GetEvent(eventId, connection())
+	w.WriteHeader(http.StatusOK)
+
+	if err := json.NewEncoder(w).Encode(event); err != nil {
+        http.Error(w, err.Error(), 500)
+		return
+	}
 }
 
 // EventCreateHandler handler create event information
 func EventCreateHandler(w http.ResponseWriter, r *http.Request) {
+	
+	var event m.Event
+	body, err := ioutil.ReadAll(r.Body)
+ 	if err != nil {
+		 http.Error(w, err.Error(), 500)
+ 	}
+ 	if err := json.Unmarshal(body, &event); err != nil {
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		w.WriteHeader(http.StatusBadRequest) // unprocessable entity
+		if err := json.NewEncoder(w).Encode(err); err != nil {
+			http.Error(w, err.Error(), 500)
+			return
+	 	}
+ 	}
+ 	e := m.CreateEvent(event, connection())
+ 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+ 	w.WriteHeader(http.StatusCreated)
+
+ 	fmt.Println(r.URL.String())
+ 	w.Header().Set("X-Frame-Options", "soooo" )
+ 	if err := json.NewEncoder(w).Encode(e); err != nil {
+		 http.Error(w, err.Error(), 500)
+		 return
+		}
+ 
+ 	if err := r.Body.Close(); err != nil {
+		 panic(err)
+	}
 }
 
 // EventDeleteHandler handler delete event information
 func EventDeleteHandler(w http.ResponseWriter, r *http.Request) {
+	
+	vars := mux.Vars(r)
+	eventId := vars["eventId"]
+
+	w.Header().Set("Content-Type", "application/json;charset=UTF-8")
+
+	if !IsValidUUID(eventId) {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	err := m.DeleteEvent(eventId, connection())
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+	}
+	w.WriteHeader(http.StatusOK)
+
+	if err := json.NewEncoder(w).Encode(m.GetEventsList(connection())); err != nil {
+        http.Error(w, err.Error(), 500)
+		return
+	}
 }
 
 // EventUpdateHandler handler update event information
 func EventUpdateHandler(w http.ResponseWriter, r *http.Request) {
+
+	vars := mux.Vars(r)
+	eventId := vars["eventId"]
+
+	w.Header().Set("Content-Type", "application/json;charset=UTF-8")
+
+	if !IsValidUUID(eventId) {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	var event m.Event
+
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+	}
+
+	if err := r.Body.Close(); err != nil {
+        panic(err)
+	}
+
+	if err := json.Unmarshal(body, &event); err != nil {
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		w.WriteHeader(http.StatusBadRequest) // unprocessable entity
+		if err := json.NewEncoder(w).Encode(err); err != nil {
+			http.Error(w, err.Error(), 500)
+			return
+		}
+	}
+
+	e := m.UpdateEvent(eventId, event, connection())
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+
+	w.Header().Set("Location", r.URL.String())
+    w.WriteHeader(http.StatusOK)
+    if err := json.NewEncoder(w).Encode(e); err != nil {
+        http.Error(w, err.Error(), 500)
+		return
+	}
 }
 
 

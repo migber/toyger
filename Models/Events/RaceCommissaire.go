@@ -1,11 +1,14 @@
 package events
+import (
+	model "toyger/models"
+)
 
 type RaceCommissaire struct{
-	Commissaire 	Commissaire	`json:"commissaire"`
-	Position		struct{		`json:"position"`
+	Commissaire 	model.Commissaire	`json:"commissaire"`
+	Position		struct{		
 		Stage	Stage	`json:"stage"`
 		Name 	string	`json:"name"`
-	}
+	} `json:"position"`
 }
 
 type RaceCommissaires []RaceCommissaire	

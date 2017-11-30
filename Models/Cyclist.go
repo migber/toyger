@@ -21,7 +21,7 @@ type Cyclist struct{
 type Cyclists []Cyclist	
 
 var DATABASE = "toyger"
-var TABLE = "cyclists"
+var CYCLISTS = "cyclists"
 
 func CreateCyclist(teamId string, c Cyclist, session *mgo.Session) Cyclist {
 	
@@ -41,7 +41,7 @@ func CreateCyclist(teamId string, c Cyclist, session *mgo.Session) Cyclist {
 			cyclist.UCICategory = c.UCICategory
 			cyclist.Nationality = c.Nationality
 			
-			collection := session.DB(DATABASE).C(TABLE)
+			collection := session.DB(DATABASE).C(CYCLISTS)
 			if err := collection.Insert(cyclist); err != nil {
 				panic(err)
 			}
@@ -56,7 +56,7 @@ func GetCyclistsList(teamId string, session *mgo.Session) Cyclists {
 		cyclists := Cyclists{}
 		defer session.Close()
 
-		c := session.DB(DATABASE).C(TABLE)
+		c := session.DB(DATABASE).C(CYCLISTS)
 		err := c.Find(nil).All(&cyclists)
 		if err != nil {
 			panic(err)
@@ -68,7 +68,7 @@ func GetCyclist(teamId string, id string, session *mgo.Session) Cyclist {
 	
 		var c Cyclist
 		defer session.Close()
-		collection := session.DB(DATABASE).C(TABLE)
+		collection := session.DB(DATABASE).C(CYCLISTS)
 		err := collection.Find(bson.M{"uciid": id, "team": teamId}).One(&c)
 		if err != nil {
 			fmt.Println(err)
@@ -80,7 +80,7 @@ func GetCyclist(teamId string, id string, session *mgo.Session) Cyclist {
 func GetCyclistInside(teamId string, id string, session *mgo.Session) error {
 	
 		var c Cyclist
-		collection := session.DB(DATABASE).C(TABLE)
+		collection := session.DB(DATABASE).C(CYCLISTS)
 		err := collection.Find(bson.M{"uciid": id, "team": teamId}).One(&c)
 		if err != nil {
 			fmt.Println(err)
@@ -96,7 +96,7 @@ func UpdateCyclist(teamId string, uid string, c Cyclist, session *mgo.Session) C
 	
 		defer session.Close()
 		
-		collection := session.DB(DATABASE).C(TABLE)
+		collection := session.DB(DATABASE).C(CYCLISTS)
 	
 		err := collection.Find(bson.M{"uciid": uid, "team": teamId}).One(&updateC)
 		if err != nil {
@@ -125,7 +125,7 @@ func DeleteCyclist(teamId string, uid string, session *mgo.Session) error {
 
 	defer session.Close()
 	
-	collection := session.DB(DATABASE).C(TABLE)
+	collection := session.DB(DATABASE).C(CYCLISTS)
 	err := collection.Remove(bson.M{"uciid": uid, "team": teamId})
 	if err != nil {
 		fmt.Println(err)

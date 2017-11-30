@@ -109,13 +109,13 @@ var routes = Routes {
 		"CommissaireDelete",
 		"DELETE",
 		"/api/commissaires/{commissaireId}",
-		CommissaireUpdateHandler,
+		CommissaireDeleteHandler,
 	},
 	Route{
 		"CommissaireUpdate",
 		"PUT",
 		"/api/commissaires/{commissaireId}",
-		CommissaireDeleteHandler,
+		CommissaireUpdateHandler,
 	},
 
 	// Manager 
@@ -158,7 +158,7 @@ var routes = Routes {
 		EventsHandler,
 	},
 	Route{
-		"Evnet Get",
+		"Event Get",
 		"GET",
 		"/api/events/{eventId}",
 		EventHandler,

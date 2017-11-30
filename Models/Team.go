@@ -25,7 +25,7 @@ type Manager struct {
 
 type Teams []Team
 
-var NAME = "teams"
+var TEAMS = "teams"
 
 func CreateTeam(t Team, session *mgo.Session) Team {
 
@@ -39,7 +39,7 @@ func CreateTeam(t Team, session *mgo.Session) Team {
 	team.Manager = t.Manager
 	team.Riders = t.Riders
 	
-	collection := session.DB(DATABASE).C(NAME)
+	collection := session.DB(DATABASE).C(TEAMS)
 	if err := collection.Insert(team); err != nil {
 		panic(err)
 	}
@@ -50,7 +50,7 @@ func GetTeamsList(session *mgo.Session) Teams {
 
 	teams := Teams{}
 	defer session.Close()
-	c := session.DB(DATABASE).C(NAME)
+	c := session.DB(DATABASE).C(TEAMS)
 	err := c.Find(nil).All(&teams)
 	if err != nil {
 		panic(err)
@@ -62,7 +62,7 @@ func GetTeam(id string, session *mgo.Session) Team {
 
 	var t Team
 	defer session.Close()
-	collection := session.DB(DATABASE).C(NAME)
+	collection := session.DB(DATABASE).C(TEAMS)
 	err := collection.Find(bson.M{"id": id}).One(&t)
 	if err != nil {
 		panic(err)
@@ -78,7 +78,7 @@ func UpdateTeam(uid string, t Team, session *mgo.Session) Team {
 
 	defer session.Close()
 	
-	collection := session.DB(DATABASE).C(NAME)
+	collection := session.DB(DATABASE).C(TEAMS)
 
 	err := collection.Find(bson.M{"id": uid}).One(&updateT)
 	if err != nil {
@@ -104,7 +104,7 @@ func DeleteTeam(uid string, session *mgo.Session) error {
 
 	defer session.Close()
 	
-	collection := session.DB(DATABASE).C(NAME)
+	collection := session.DB(DATABASE).C(TEAMS)
 	err := collection.Remove(bson.M{"id": uid})
 	if err != nil {
 		fmt.Println(err)
@@ -130,7 +130,7 @@ func InsertRider(id string, riderId string, session *mgo.Session) error {
 	var updatedTeam Team
 	defer session.Close()
 	
-	collection := session.DB(DATABASE).C(NAME)
+	collection := session.DB(DATABASE).C(TEAMS)
 	err := collection.Find(bson.M{"id": id}).One(&updatedTeam)
 	if err != nil {
 		return err
@@ -150,7 +150,7 @@ func DeleteRider(id string, riderId string, session *mgo.Session) error{
 	var emptyRiders []string
 	defer session.Close()
 	
-	collection := session.DB(DATABASE).C(NAME)
+	collection := session.DB(DATABASE).C(TEAMS)
 	err := collection.Find(bson.M{"id": id}).One(&updatedTeam)
 	if err != nil {
 		fmt.Println(err)
