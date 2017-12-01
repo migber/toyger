@@ -33,7 +33,7 @@ func CreateStage(eventId string, s Stage, session *mgo.Session) Stage {
 	fmt.Println(existsStage)
 	if existsStage != nil {
 		stage.ID = s.ID
-		stage.Event = s.Event
+		stage.Event = eventId
 		stage.Name = s.Name
 		stage.Km = s.Km
 		stage.Sprints = s.Sprints

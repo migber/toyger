@@ -614,18 +614,159 @@ func EventUpdateHandler(w http.ResponseWriter, r *http.Request) {
 
 // ParticipantsHandler handler participants information
 func ParticipantsHandler(w http.ResponseWriter, r *http.Request) {
+	
+	vars := mux.Vars(r)
+	eventId := vars["eventId"]
+
+	w.Header().Set("Content-Type", "application/json;charset=UTF-8")
+	w.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(w).Encode(m.GetParticipantsList(eventId, connection())); err != nil {
+		panic(err)
+	}
 }
 // ParticipantHandler handler participant information
 func ParticipantHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	eventId := vars["eventId"]
+	participantId := vars["participantId"]
+
+	w.Header().Set("Content-Type", "application/json;charset=UTF-8")
+
+	if !IsValidUUID(eventId) {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	participantNo, _ := strconv.Atoi(participantId)
+	if !IsValidRaceNumber(participantNo){
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	participant := m.GetParticipant(eventId, participantNo, connection())
+	w.WriteHeader(http.StatusOK)
+
+	if err := json.NewEncoder(w).Encode(participant); err != nil {
+        http.Error(w, err.Error(), 500)
+		return
+	}
 }
 // ParticipantCreateHandler handler create participant information
 func ParticipantCreateHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	eventId := vars["eventId"]
+	var participant m.Participant
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+	}
+
+	if err := json.Unmarshal(body, &participant); err != nil {
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		w.WriteHeader(http.StatusBadRequest) // unprocessable entity
+		if err := json.NewEncoder(w).Encode(err); err != nil {
+			http.Error(w, err.Error(), 500)
+			return
+		}
+	}
+	
+	p := m.CreateParticipant(eventId, participant, connection())
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	if strconv.Itoa(p.No) == ""{
+		w.WriteHeader(http.StatusConflict)
+	} else {
+		w.WriteHeader(http.StatusOK)	
+		updateErr := m.InsertEventStages(eventId, p.No, connection())
+		if updateErr != nil {
+			fmt.Println("Something went wrong.")
+		}
+		if err := json.NewEncoder(w).Encode(p); err != nil {
+			http.Error(w, err.Error(), 500)
+			return
+		}
+	}
+	
+	fmt.Println(r.URL.String())
+	if err := r.Body.Close(); err != nil {
+		panic(err)
+	}
 }
 // ParticipantDeleteHandler handler delete participant information
 func ParticipantDeleteHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	eventId := vars["eventId"]
+	participantId := vars["participantId"]
+	w.Header().Set("Content-Type", "application/json;charset=UTF-8")
+
+	if !IsValidUUID(eventId) {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	participantNo, _ := strconv.Atoi(participantId)
+	if !IsValidStageId(participantNo){
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	err := m.DeleteParticipant(eventId, participantNo, connection())
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+	}
+	err = m.DeleteEventParticipant(eventId, participantNo, connection())
+	if err != nil{
+		fmt.Println(fmt.Errorf("%s", err))
+	}
+	w.WriteHeader(http.StatusOK)
+
+	if err := json.NewEncoder(w).Encode(m.GetParticipantsList(eventId, connection())); err != nil {
+        http.Error(w, err.Error(), 500)
+		return
+	}
 }
 // ParticipantUpdateHandler handler update participant information
 func ParticipantUpdateHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	eventId := vars["eventId"]
+	participantId := vars["participantId"]
+	w.Header().Set("Content-Type", "application/json;charset=UTF-8")
+
+	if !IsValidUUID(eventId) {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	participantNo, _ := strconv.Atoi(participantId)
+	if !IsValidStageId(participantNo){
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	var particicipant m.Participant
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+	}
+	if err := r.Body.Close(); err != nil {
+        panic(err)
+	}
+
+	if err := json.Unmarshal(body, &particicipant); err != nil {
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		w.WriteHeader(http.StatusBadRequest) // unprocessable entity
+		if err := json.NewEncoder(w).Encode(err); err != nil {
+			http.Error(w, err.Error(), 500)
+			return
+		}
+	}
+
+	p := m.UpdateParticipant(eventId, participantNo, particicipant, connection())
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+
+	w.Header().Set("Location", r.URL.String())
+    w.WriteHeader(http.StatusOK)
+    if err := json.NewEncoder(w).Encode(p); err != nil {
+        http.Error(w, err.Error(), 500)
+		return
+	}
 }
 
 // StagesHandler handler stages information

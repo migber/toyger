@@ -23,3 +23,11 @@ func IsValidStageId(id int) bool {
         return false
     }
 }
+
+func IsValidRaceNumber(id int) bool {
+    if (id > 0 && id < 201){
+        return true
+    } else {
+        return false
+    }
+}

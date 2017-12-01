@@ -17,7 +17,7 @@ type Event struct {
 	NoCommissaires 	int 				`json:"no_commissaires"`
 	TotalKm 		int					`json:"total_km"`
 	Stages			[]int		        `json:"stages"`
-	Participants	[]string		    `json:"participants"`
+	Participants	[]int		    `json:"participants"`
 	Commissaires	[]string	        `json:"commissaires"`
 }
 
@@ -72,8 +72,6 @@ func GetEvent(id string, session *mgo.Session) Event {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(e)
-
 	return e
 }
 
@@ -122,7 +120,7 @@ func DeleteEvent(id string, session *mgo.Session) error {
 	return err
 }
 
-func FindEventsParticipant(riders []string, id string) int {
+func FindEventsParticipant(riders []int, id int) int {
 	
 	var index int
 	for ind, cyclist := range riders {
@@ -155,7 +153,7 @@ func FindEventCommissaires(commissaires []string, id string) int {
 	return index
 }
 
-func InsertEventParticipants(id string, riderId string, session *mgo.Session) error {
+func InsertEventParticipants(id string, riderId int, session *mgo.Session) error {
 	
 	var updatedEvent Event
 	defer session.Close()
@@ -212,10 +210,10 @@ func InsertEventStages(id string, stageId int, session *mgo.Session) error {
 	return nil
 }
 
-func DeleteEventParticipant(id string, riderId string, session *mgo.Session) error{
+func DeleteEventParticipant(id string, riderId int, session *mgo.Session) error{
 	
 	var updateEvent Event
-	var emptyRiders []string
+	var emptyRiders []int
 	defer session.Close()
 	
 	collection := session.DB(DATABASE).C(EVENTS)
@@ -225,7 +223,6 @@ func DeleteEventParticipant(id string, riderId string, session *mgo.Session) err
 	}
 	riders := updateEvent.Participants
 	index := FindEventsParticipant(riders, riderId)
-	fmt.Println(index)
 	if (len(riders) == 1 && index == 0){
 		updateEvent.Participants = emptyRiders
 	} else {
@@ -255,7 +252,6 @@ func DeleteEventCommissaire(id string, comId string, session *mgo.Session) error
 	}
 	commissaires := updateEvent.Commissaires
 	index := FindEventCommissaires(commissaires, comId)
-	fmt.Println(index)
 	if (len(commissaires) == 1 && index == 0){
 		updateEvent.Commissaires = emptyCom
 	} else {
@@ -285,7 +281,6 @@ func DeleteEventStage(id string, stageId int, session *mgo.Session) error{
 	}
 	stages := updateEvent.Stages
 	index := FindEventStage(stages, stageId)
-	fmt.Println(index)
 	if (len(stages) == 1 && index == 0){
 		updateEvent.Stages = emptyStage
 	} else {

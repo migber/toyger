@@ -186,7 +186,7 @@ var routes = Routes {
 	Route{
 		"Participants",
 		"GET",
-		"/api/events/participants",
+		"/api/events/{eventId}/participants",
 		ParticipantsHandler,
 	},
 	Route{
