@@ -137,3 +137,84 @@ func DeleteStage(eventId string, id int, session *mgo.Session) error {
 
 	return err
 }
+
+func AddSprints(eventId string, stageId int, s Sprint, session *mgo.Session) error {
+	
+	var updateStages Stage
+	defer session.Close()
+	collection := session.DB(DATABASE).C(STAGES)
+	err := collection.Find(bson.M{"id": stageId}).One(&updateStages)
+	if err != nil {
+		return err
+	}
+	sprints := updateStages.Sprints
+	newSprints := append(sprints, s)
+	updateStages.Sprints = newSprints
+	if err := collection.Update(bson.M{"id": stageId}, updateStages); err != nil {
+		return err
+	}
+	return nil
+}
+
+func DeleteStageSprint(id string, stageId int, sprintId string, session *mgo.Session) error{
+	
+	var updateStage Stage
+	var emptySprints []Sprint
+	defer session.Close()
+	
+	collection := session.DB(DATABASE).C(STAGES)
+	err := collection.Find(bson.M{"id": id}).One(&updateStage)
+	if err != nil {
+		fmt.Println(err)
+	}
+	sprints := updateStage.Sprints
+	index := FindStageSprint(sprints, sprintId)
+	if (len(sprints) == 1 && index == 0){
+		updateStage.Sprints = emptySprints
+	} else {
+		newSprint := append(sprints[:index], sprints[index+1:]...)
+		updateStage.Sprints = newSprint
+	}
+	newS := append(sprints[:index], sprints[index+1:]...)
+	updateStage.Sprints = newS
+	if err := collection.Update(bson.M{"id": id}, updateStage); err != nil {
+		fmt.Println(err)
+		return err
+	} else {
+		return nil
+	}
+}
+
+func FindStageSprint(sprints []Sprint, id string) int {
+	
+	var index int
+	for ind, sprint := range sprints {
+		if sprint.Id == id {
+			index = ind
+		}
+	}
+	return index
+}
+
+func UpdateStageSprint(stageId int, sprintId string, sprintNew Sprint, session *mgo.Session) error{
+	
+	var updateStage Stage
+	defer session.Close()
+	
+	collection := session.DB(DATABASE).C(STAGES)
+	err := collection.Find(bson.M{"id": stageId}).One(&updateStage)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(updateStage)
+	sprints := updateStage.Sprints
+	index := FindStageSprint(sprints, sprintId)
+	updateStage.Sprints[index] = sprintNew
+	if err := collection.Update(bson.M{"id": stageId}, updateStage); err != nil {
+		fmt.Println(err)
+		return err
+	} else {
+		return nil
+	}
+}
+	

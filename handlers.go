@@ -787,9 +787,9 @@ func StageHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	eventId := vars["eventId"]
 	stageId := vars["stageId"]
+	fmt.Println(stageId)
 
 	w.Header().Set("Content-Type", "application/json;charset=UTF-8")
-
 	if !IsValidUUID(eventId) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
@@ -930,33 +930,335 @@ func StageUpdateHandler(w http.ResponseWriter, r *http.Request) {
 
 // SprintsHandler handler sprints information
 func SprintsHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	eventId := vars["eventId"]
+	stageId := vars["stageId"]
+
+	intStageId, _ := strconv.Atoi(stageId)
+
+	w.Header().Set("Content-Type", "application/json;charset=UTF-8")
+	w.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(w).Encode(m.GetSprintList(eventId, intStageId, connection())); err != nil {
+		panic(err)
+	}
 }
+
 // SprintHandler handler sprint information
 func SprintHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	eventId := vars["eventId"]
+	stageId := vars["stageId"]
+	sprintId := vars["sprintId"]
+
+	w.Header().Set("Content-Type", "application/json;charset=UTF-8")
+
+	if !IsValidUUID(eventId) {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	intStageId, _ := strconv.Atoi(stageId)
+	if !IsValidStageId(intStageId){
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	if !IsValidUUID(sprintId) {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	sprint := m.GetSprint(eventId, intStageId, sprintId, connection())
+	w.WriteHeader(http.StatusOK)
+
+	if err := json.NewEncoder(w).Encode(sprint); err != nil {
+        http.Error(w, err.Error(), 500)
+		return
+	}
 }
 // SprintCreateHandler handler create sprint
 func SprintCreateHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	eventId := vars["eventId"]
+	stageId := vars["stageId"]
+	intStageId, _ := strconv.Atoi(stageId)
+
+	var sprint m.Sprint
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+	}
+
+	if err := json.Unmarshal(body, &sprint); err != nil {
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		w.WriteHeader(http.StatusBadRequest) // unprocessable entity
+		if err := json.NewEncoder(w).Encode(err); err != nil {
+			http.Error(w, err.Error(), 500)
+			return
+		}
+	}
+	
+	s := m.CreateSprint(eventId, intStageId, sprint, connection())
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	if s.Id == ""{
+		w.WriteHeader(http.StatusConflict)
+	} else {
+		w.WriteHeader(http.StatusOK)	
+		updateErr := m.AddSprints(eventId, intStageId, sprint, connection())
+		if updateErr != nil {
+			fmt.Println("Something went wrong.")
+		}
+		if err := json.NewEncoder(w).Encode(s); err != nil {
+			http.Error(w, err.Error(), 500)
+			return
+		}
+	}
+	fmt.Println(r.URL.String())
+	if err := r.Body.Close(); err != nil {
+		panic(err)
+	}
 }
+
 // SprintDeleteHandler handler delete sprint 
 func SprintDeleteHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	eventId := vars["eventId"]
+	stageId := vars["stageId"]
+	sprintId := vars["sprintId"]
+	w.Header().Set("Content-Type", "application/json;charset=UTF-8")
+
+	if !IsValidUUID(eventId) {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	intStageId, _ := strconv.Atoi(stageId)
+	if !IsValidStageId(intStageId){
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	err := m.DeleteSprint(eventId, intStageId, sprintId, connection())
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+	}
+	err = m.DeleteStageSprint(eventId, intStageId, sprintId, connection())
+	if err != nil{
+		fmt.Println(fmt.Errorf("%s", err))
+	}
+	w.WriteHeader(http.StatusOK)
+
+	if err := json.NewEncoder(w).Encode(m.GetSprintList(eventId, intStageId, connection())); err != nil {
+        http.Error(w, err.Error(), 500)
+		return
+	}
 }
 // SprintUpdateHandler handler update sprint information
 func SprintUpdateHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	eventId := vars["eventId"]
+	stageId := vars["stageId"]
+	sprintId := vars["sprintId"]
+	w.Header().Set("Content-Type", "application/json;charset=UTF-8")
+
+	if !IsValidUUID(eventId) {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	intStageId, _ := strconv.Atoi(stageId)
+	if !IsValidStageId(intStageId){
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	if !IsValidUUID(eventId) {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	var sprint m.Sprint
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+	}
+	if err := r.Body.Close(); err != nil {
+        panic(err)
+	}
+
+	if err := json.Unmarshal(body, &sprint); err != nil {
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		w.WriteHeader(http.StatusBadRequest) // unprocessable entity
+		if err := json.NewEncoder(w).Encode(err); err != nil {
+			http.Error(w, err.Error(), 500)
+			return
+		}
+	}
+
+	s := m.UpdateSprint(eventId, intStageId, sprintId, sprint, connection())
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	err = m.UpdateStageSprint(intStageId, sprintId, sprint, connection())
+	if err != nil{
+		fmt.Println(fmt.Errorf("%s", err))
+	}
+	w.Header().Set("Location", r.URL.String())
+    w.WriteHeader(http.StatusOK)
+    if err := json.NewEncoder(w).Encode(s); err != nil {
+        http.Error(w, err.Error(), 500)
+		return
+	}
 }
 
 
 // EventCommissairesHandler handler event commissaire information
 func EventCommissairesHandler(w http.ResponseWriter, r *http.Request) {
+	
+	vars := mux.Vars(r)
+	eventId := vars["eventId"]
+
+	w.Header().Set("Content-Type", "application/json;charset=UTF-8")
+	w.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(w).Encode(m.GetRaceCommissairesList(eventId, connection())); err != nil {
+		panic(err)
+	}	
 }
+
 // EventCommissaireHandler handler event commissaire information
 func EventCommissaireHandler(w http.ResponseWriter, r *http.Request) {
+
+	vars := mux.Vars(r)
+	eventId := vars["eventId"]
+	raceCommId := vars["commissaireId"]
+
+	w.Header().Set("Content-Type", "application/json;charset=UTF-8")
+
+	if !IsValidUUID(eventId) {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	if !isValidUCIID(raceCommId) {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	raceCommissaire := m.GetRaceCommissaire(eventId, raceCommId, connection())
+	w.WriteHeader(http.StatusOK)
+
+	if err := json.NewEncoder(w).Encode(raceCommissaire); err != nil {
+        http.Error(w, err.Error(), 500)
+		return
+	}
 }
 // EventCommissaireCreateHandler handler create event commissaire information
 func EventCommissaireCreateHandler(w http.ResponseWriter, r *http.Request) {
+	
+	vars := mux.Vars(r)
+	eventId := vars["eventId"]
+	var raceCommissaire m.RaceCommissaire
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+	}
+
+	if err := json.Unmarshal(body, &raceCommissaire); err != nil {
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		w.WriteHeader(http.StatusBadRequest) // unprocessable entity
+		if err := json.NewEncoder(w).Encode(err); err != nil {
+			http.Error(w, err.Error(), 500)
+			return
+		}
+	}
+	
+	s := m.CreateRaceCommissaire(eventId, raceCommissaire, connection())
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	if s.Commissaire.UCIID == ""{
+		w.WriteHeader(http.StatusConflict)
+	} else {
+		w.WriteHeader(http.StatusOK)	
+		updateErr := m.InsertEventCommissaire(eventId, s.Commissaire.UCIID, connection())
+		if updateErr != nil {
+			fmt.Println("Something went wrong.")
+		}
+		if err := json.NewEncoder(w).Encode(s); err != nil {
+			http.Error(w, err.Error(), 500)
+			return
+		}
+	}
+	
+	fmt.Println(r.URL.String())
+	if err := r.Body.Close(); err != nil {
+		panic(err)
+	}
 }
 // EventCommissaireDeleteHandler handler delete event commissaire 
 func EventCommissaireDeleteHandler(w http.ResponseWriter, r *http.Request) {
+	
+	vars := mux.Vars(r)
+	eventId := vars["eventId"]
+	rcId := vars["commissaireId"]
+	w.Header().Set("Content-Type", "application/json;charset=UTF-8")
+
+	if !IsValidUUID(eventId) {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	if !isValidUCIID(rcId){
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	err := m.DeleteRaceCommissaire(eventId, rcId, connection())
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+	}
+	err = m.DeleteEventCommissaire(eventId, rcId, connection())
+	if err != nil{
+		fmt.Println(fmt.Errorf("%s", err))
+	}
+	w.WriteHeader(http.StatusOK)
+
+	if err := json.NewEncoder(w).Encode(m.GetRaceCommissairesList(eventId, connection())); err != nil {
+        http.Error(w, err.Error(), 500)
+		return
+	}
 }
 // EventCommissaireUpdateHandler handler update event commissaire information
 func EventCommissaireUpdateHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	eventId := vars["eventId"]
+	commissaireId := vars["commissaireId"]
+	w.Header().Set("Content-Type", "application/json;charset=UTF-8")
+
+	if !IsValidUUID(eventId) {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	if !isValidUCIID(commissaireId){
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	var raceCommiss m.RaceCommissaire
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+	}
+	if err := r.Body.Close(); err != nil {
+        panic(err)
+	}
+
+	if err := json.Unmarshal(body, &raceCommiss); err != nil {
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		w.WriteHeader(http.StatusBadRequest) // unprocessable entity
+		if err := json.NewEncoder(w).Encode(err); err != nil {
+			http.Error(w, err.Error(), 500)
+			return
+		}
+	}
+
+	rc := m.UpdateRaceCommissaire(eventId, commissaireId, raceCommiss, connection())
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+
+	w.Header().Set("Location", r.URL.String())
+    w.WriteHeader(http.StatusOK)
+    if err := json.NewEncoder(w).Encode(rc); err != nil {
+        http.Error(w, err.Error(), 500)
+		return
+	}
 }
