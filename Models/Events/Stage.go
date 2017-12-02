@@ -30,7 +30,6 @@ func CreateStage(eventId string, s Stage, session *mgo.Session) Stage {
 	defer session.Close() 
 
 	existsStage := GetStageInside(eventId, s.ID, session)
-	fmt.Println(existsStage)
 	if existsStage != nil {
 		stage.ID = s.ID
 		stage.Event = eventId
@@ -206,7 +205,6 @@ func UpdateStageSprint(stageId int, sprintId string, sprintNew Sprint, session *
 	if err != nil {
 		fmt.Println(err)
 	}
-	fmt.Println(updateStage)
 	sprints := updateStage.Sprints
 	index := FindStageSprint(sprints, sprintId)
 	updateStage.Sprints[index] = sprintNew

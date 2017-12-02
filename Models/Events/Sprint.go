@@ -28,7 +28,6 @@ func CreateSprint(eventId string, stageId int, s Sprint, session *mgo.Session) S
 	defer session.Close() 
 
 	existingSprint := GetSprintInside(eventId, stageId, s.Id, session)
-	fmt.Println(existingSprint)
 	if existingSprint != nil {
 		sprint.Id = uuid.NewV4().String()
 		sprint.Name = s.Name
