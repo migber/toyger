@@ -57,7 +57,7 @@ func GetCyclistsList(teamId string, session *mgo.Session) Cyclists {
 		defer session.Close()
 
 		c := session.DB(DATABASE).C(CYCLISTS)
-		err := c.Find(nil).All(&cyclists)
+		err := c.Find(bson.M{"team": teamId}).All(&cyclists)
 		if err != nil {
 			panic(err)
 		}

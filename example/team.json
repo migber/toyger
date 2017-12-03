@@ -1,0 +1,11 @@
+{
+    "name": "SKY",
+    "manager": {
+        "name": "Manager I",
+        "surname": "Manager Surname I",
+        "birth_date": "1995-06-08",
+        "phone": "+37063015590",
+        "nationality": "Italian"
+    },
+    "riders": []
+}

@@ -1,0 +1,47 @@
+{
+	"commissaire": {
+		"uciid": "10008662888",
+		"name": "Commissaire 10",
+		"birth_date": "1995-06-08",
+		"gender": "female",
+		"uci_category": "Elite National",
+		"nationality": "Lithuanian"
+		},
+	"position": [{
+		"stage": "1",
+		"name": "timekeeper"
+	},
+	{
+		"stage": "2",
+		"name": "Finish judge"
+	},
+	{
+		"stage": "3",
+		"name": "Starter"
+	}]
+}
+
+{
+	"no": 5,
+	"rider": 
+		{
+	"uci_id": "10010300909",
+	"name": "Cyclist SKY II",
+	"surname": "Cyclist Surname SKY II",
+	"team": "fda56266-831f-4a09-947d-f63e7ca419c5",
+	"coaches": [
+		"SKY Team MANAGER"
+	],
+	"birth_date": "1995-06-08",
+	"gender": "female",
+	"uci_category": "U23",
+	"nationality": "Lithuanian"
+	},
+	"total_time": 0,
+	"total_points": 0,
+	"mountain_points": 0,
+	"sprint_points": 0,
+	"u23": true,
+	"bk": false,
+	"state": ""
+}

@@ -747,6 +747,7 @@ func ParticipantCreateHandler(w http.ResponseWriter, r *http.Request) {
 	if (validToken) {
 		vars := mux.Vars(r)
 		eventId := vars["eventId"]
+		
 		var participant m.Participant
 		body, err := ioutil.ReadAll(r.Body)
 		if err != nil {
@@ -758,7 +759,6 @@ func ParticipantCreateHandler(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest) // unprocessable entity
 			if err := json.NewEncoder(w).Encode(err); err != nil {
 				http.Error(w, err.Error(), 500)
-				return
 			}
 		}
 		
@@ -768,13 +768,12 @@ func ParticipantCreateHandler(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusConflict)
 		} else {
 			w.WriteHeader(http.StatusOK)	
-			updateErr := m.InsertEventStages(eventId, p.No, connection())
+			updateErr := m.InsertEventParticipants(eventId, p.No, connection())
 			if updateErr != nil {
 				fmt.Println("Something went wrong.")
 			}
 			if err := json.NewEncoder(w).Encode(p); err != nil {
 				http.Error(w, err.Error(), 500)
-				return
 			}
 		}
 		
@@ -1348,7 +1347,6 @@ func EventCommissaireCreateHandler(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		}
-		
 		fmt.Println(r.URL.String())
 		if err := r.Body.Close(); err != nil {
 			panic(err)

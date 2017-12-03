@@ -72,7 +72,7 @@ func GetStageList(eventId string, session *mgo.Session) Stages {
 	defer session.Close()
 
 	c := session.DB(DATABASE).C(STAGES)
-	err := c.Find(nil).All(&stages)
+	err := c.Find(bson.M{"event": eventId}).All(&stages)
 	if err != nil {
 		panic(err)
 	}

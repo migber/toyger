@@ -1,0 +1,10 @@
+{
+    "uci_id": "10010340904",
+    "name": "Cyclist SKY I",
+    "surname": "Cyclist Surname SKY I",
+    "coaches": ["SKY Team MANAGER"],
+    "birth_date": "1995-06-08",
+    "gender": "female",
+    "uci_category": "U23",
+    "nationality": "Lithuanian"
+}

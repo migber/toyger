@@ -19,7 +19,6 @@ type RaceCommissaires []RaceCommissaire
 var RACECOMMISSAIRES = "racecommissaires"
 
 func CreateRaceCommissaire(eventId string, c RaceCommissaire, session *mgo.Session) RaceCommissaire {
-	fmt.Println("CIaa")
 	var raceCom RaceCommissaire
 	defer session.Close() 
 
@@ -58,7 +57,7 @@ func GetRaceCommissairesList(eventId string, session *mgo.Session) RaceCommissai
 	defer session.Close()
 
 	c := session.DB(DATABASE).C(RACECOMMISSAIRES)
-	err := c.Find(nil).All(&raceComms)
+	err := c.Find(bson.M{"event": eventId}).All(&raceComms)
 	if err != nil {
 		panic(err)
 	}

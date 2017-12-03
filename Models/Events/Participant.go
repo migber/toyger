@@ -1,7 +1,6 @@
 package events
 
 import (
-	"time"
 	model "toyger/models"
 	"fmt"
 	"gopkg.in/mgo.v2"
@@ -12,7 +11,7 @@ type Participant struct {
 	No				int			`json:"no"`
 	Event			string		`json:"event"`
 	Rider			model.Cyclist	    `json:"rider"`
-	TotalTime		time.Time	`json:"total_time"`
+	TotalTime		int 		`json:"total_time"`
 	TotalPoints		int			`json:"total_points"`			
 	MountainPoints	int			`json:"mountain_points"`
 	SprintPoints	int			`json:"sprint_points"`
@@ -28,7 +27,7 @@ func CreateParticipant(eventId string, p Participant, session *mgo.Session) Part
 	
 	var participant Participant
 	defer session.Close() 
-
+	fmt.Println(p.No)
 	existsParticipant := GetParticipantInside(eventId, p.No, session)
 	if existsParticipant != nil {
 		participant.No = p.No
@@ -70,7 +69,7 @@ func GetParticipantsList(eventId string, session *mgo.Session) Participants {
 	defer session.Close()
 
 	c := session.DB(DATABASE).C(PARTICIPANTS)
-	err := c.Find(nil).All(&part)
+	err := c.Find(bson.M{"event": eventId}).All(&part)
 	if err != nil {
 		panic(err)
 	}

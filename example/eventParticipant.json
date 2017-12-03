@@ -1,0 +1,24 @@
+{
+    "no": 1,
+    "rider": 
+        {
+            "uci_id": "10010340904",
+            "name": "Cyclist SKY I",
+            "surname": "Cyclist Surname SKY I UPDATED",
+            "team": "",
+            "coaches": [
+                "SKY Team MANAGER"
+            ],
+            "birth_date": "1995-06-08",
+            "gender": "female",
+            "uci_category": "U23",
+            "nationality": "Lithuanian"
+    },
+    "total_time": 0,
+    "total_points": 0,
+    "mountain_points": 0,
+    "sprint_points": 0,
+    "u23": false,
+    "bk": false,
+    "state": "DNQ"
+}

@@ -67,7 +67,7 @@ func GetSprintList(eventId string, stageId int, session *mgo.Session) Sprints {
 	defer session.Close()
 
 	c := session.DB(DATABASE).C(SPRINTS)
-	err := c.Find(nil).All(&sprints)
+	err := c.Find(bson.M{"event": eventId, "stage": stageId}).All(&sprints)
 	if err != nil {
 		panic(err)
 	}

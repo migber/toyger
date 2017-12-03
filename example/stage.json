@@ -1,0 +1,13 @@
+{
+    "id": 1,
+    "name": "Stage I",
+    "km": 90,
+    "sprints": [],
+    "abandoned": 0,
+    "disqualified": 1,
+    "starters": 2,
+    "remaining": 1,
+    "after_time_limit": 0,
+    "time_limit": 10,
+    "not_started": 0
+}
