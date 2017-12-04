@@ -22,12 +22,14 @@ type Sprint struct {
 type Sprints []Sprint
 var SPRINTS = "sprints"
 
-func CreateSprint(eventId string, stageId int, s Sprint, session *mgo.Session) Sprint {
+func CreateSprint(eventId string, stageId int, s Sprint, session *mgo.Session,
+	dbName string, tableName string) Sprint {
 	
 	var sprint Sprint
 	defer session.Close() 
 
-	existingSprint := GetSprintInside(eventId, stageId, s.Id, session)
+	existingSprint := GetSprintInside(eventId, stageId, s.Id, 
+									  session, dbName, tableName)
 	if existingSprint != nil {
 		sprint.Id = uuid.NewV4().String()
 		sprint.Name = s.Name
@@ -39,7 +41,7 @@ func CreateSprint(eventId string, stageId int, s Sprint, session *mgo.Session) S
 		sprint.Third = s.Third
 		sprint.Bonuses = s.Bonuses
 
-		collection := session.DB(DATABASE).C(SPRINTS)
+		collection := session.DB(dbName).C(tableName)
 		if err := collection.Insert(sprint); err != nil {
 			panic(err)
 		}
@@ -49,10 +51,11 @@ func CreateSprint(eventId string, stageId int, s Sprint, session *mgo.Session) S
 	return sprint
 }
 
-func GetSprintInside(eventId string, stageId int, id string, session *mgo.Session) error {
+func GetSprintInside(eventId string, stageId int, id string, session *mgo.Session,
+	dbName string, tableName string) error {
 	
 	var s Sprint
-	collection := session.DB(DATABASE).C(SPRINTS)
+	collection := session.DB(dbName).C(tableName)
 	err := collection.Find(bson.M{"id": id, "event": eventId, "stage": stageId}).One(&s)
 	if err != nil {
 		fmt.Println(err)
@@ -61,12 +64,13 @@ func GetSprintInside(eventId string, stageId int, id string, session *mgo.Sessio
 	return err
 }
 
-func GetSprintList(eventId string, stageId int, session *mgo.Session) Sprints {
+func GetSprintList(eventId string, stageId int, session *mgo.Session,
+	dbName string, tableName string) Sprints {
 	
 	sprints := Sprints{}
 	defer session.Close()
 
-	c := session.DB(DATABASE).C(SPRINTS)
+	c := session.DB(dbName).C(tableName)
 	err := c.Find(bson.M{"event": eventId, "stage": stageId}).All(&sprints)
 	if err != nil {
 		panic(err)
@@ -74,11 +78,12 @@ func GetSprintList(eventId string, stageId int, session *mgo.Session) Sprints {
 	return sprints
 }
 
-func GetSprint(eventId string, stageId int, id string, session *mgo.Session) Sprint {
+func GetSprint(eventId string, stageId int, id string, session *mgo.Session,
+	dbName string, tableName string) Sprint {
 	
 	var s Sprint
 	defer session.Close()
-	collection := session.DB(DATABASE).C(SPRINTS)
+	collection := session.DB(dbName).C(tableName)
 	err := collection.Find(bson.M{"id": id, "event": eventId, "stage": stageId}).One(&s)
 	if err != nil {
 		fmt.Println(err)
@@ -87,13 +92,14 @@ func GetSprint(eventId string, stageId int, id string, session *mgo.Session) Spr
 	return s
 }
 
-func UpdateSprint(eventId string, stageId int, id string, s Sprint, session *mgo.Session) Sprint {
+func UpdateSprint(eventId string, stageId int, id string, s Sprint, session *mgo.Session,
+	dbName string, tableName string) Sprint {
 	
 	var updateSprint Sprint
 
 	defer session.Close()
 	
-	collection := session.DB(DATABASE).C(SPRINTS)
+	collection := session.DB(dbName).C(tableName)
 	err := collection.Find(bson.M{"id": id, "event": eventId, "stage": stageId}).One(&updateSprint)
 	if err != nil {
 		panic(err)
@@ -112,11 +118,12 @@ func UpdateSprint(eventId string, stageId int, id string, s Sprint, session *mgo
 	return updateSprint
 }
 
-func DeleteSprint(eventId string, stageId int, id string, session *mgo.Session) error {
+func DeleteSprint(eventId string, stageId int, id string, session *mgo.Session,
+	dbName string, tableName string) error {
 	
 	defer session.Close()
 	
-	collection := session.DB(DATABASE).C(SPRINTS)
+	collection := session.DB(dbName).C(tableName)
 	err := collection.Remove(bson.M{"id": id, "event": eventId, "stage": stageId})
 	if err != nil {
 		fmt.Println(err)

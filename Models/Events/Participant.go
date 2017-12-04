@@ -23,12 +23,13 @@ type Participant struct {
 type Participants []Participant
 var PARTICIPANTS = "participants"
 
-func CreateParticipant(eventId string, p Participant, session *mgo.Session) Participant {
+func CreateParticipant(eventId string, p Participant, session *mgo.Session,
+					  dbName string, tableName string) Participant {
 	
 	var participant Participant
-	defer session.Close() 
-	fmt.Println(p.No)
-	existsParticipant := GetParticipantInside(eventId, p.No, session)
+	defer session.Close()
+	existsParticipant := GetParticipantInside(eventId, p.No, session,
+											 dbName, tableName)
 	if existsParticipant != nil {
 		participant.No = p.No
 		participant.Event = eventId
@@ -41,7 +42,7 @@ func CreateParticipant(eventId string, p Participant, session *mgo.Session) Part
 		participant.Bk = p.Bk
 		participant.State = p.State
 		
-		collection := session.DB(DATABASE).C(PARTICIPANTS)
+		collection := session.DB(dbName).C(tableName)
 		if err := collection.Insert(participant); err != nil {
 			panic(err)
 		}
@@ -51,10 +52,11 @@ func CreateParticipant(eventId string, p Participant, session *mgo.Session) Part
 	return participant
 }
 
-func GetParticipantInside(eventId string, id int, session *mgo.Session) error {
+func GetParticipantInside(eventId string, id int, session *mgo.Session,
+	dbName string, tableName string) error {
 	
 	var p Participant
-	collection := session.DB(DATABASE).C(PARTICIPANTS)
+	collection := session.DB(dbName).C(tableName)
 	err := collection.Find(bson.M{"no": id, "event": eventId}).One(&p)
 	if err != nil {
 		fmt.Println(err)
@@ -63,12 +65,13 @@ func GetParticipantInside(eventId string, id int, session *mgo.Session) error {
 	return err
 }
 
-func GetParticipantsList(eventId string, session *mgo.Session) Participants {
+func GetParticipantsList(eventId string, session *mgo.Session,
+	dbName string, tableName string) Participants {
 	
 	part := Participants{}
 	defer session.Close()
 
-	c := session.DB(DATABASE).C(PARTICIPANTS)
+	c := session.DB(dbName).C(tableName)
 	err := c.Find(bson.M{"event": eventId}).All(&part)
 	if err != nil {
 		panic(err)
@@ -76,11 +79,12 @@ func GetParticipantsList(eventId string, session *mgo.Session) Participants {
 	return part
 }
 
-func GetParticipant(eventId string, id int, session *mgo.Session) Participant {
+func GetParticipant(eventId string, id int, session *mgo.Session,
+					dbName string, tableName string) Participant {
 	
 	var p Participant
 	defer session.Close()
-	collection := session.DB(DATABASE).C(PARTICIPANTS)
+	collection := session.DB(dbName).C(tableName)
 	err := collection.Find(bson.M{"no": id, "event": eventId}).One(&p)
 	if err != nil {
 		fmt.Println(err)
@@ -89,13 +93,14 @@ func GetParticipant(eventId string, id int, session *mgo.Session) Participant {
 	return p
 }
 
-func UpdateParticipant(eventId string, id int, p Participant, session *mgo.Session) Participant {
+func UpdateParticipant(eventId string, id int, p Participant, session *mgo.Session,
+	dbName string, tableName string) Participant {
 	
 	var updateParticipant Participant
 
 	defer session.Close()
 	
-	collection := session.DB(DATABASE).C(PARTICIPANTS)
+	collection := session.DB(dbName).C(tableName)
 
 	err := collection.Find(bson.M{"no": id, "event": eventId}).One(&updateParticipant)
 	if err != nil {
@@ -119,11 +124,12 @@ func UpdateParticipant(eventId string, id int, p Participant, session *mgo.Sessi
 	return updateParticipant
 }
 
-func DeleteParticipant(eventId string, id int, session *mgo.Session) error {
+func DeleteParticipant(eventId string, id int, session *mgo.Session,
+	dbName string, tableName string) error {
 	
 	defer session.Close()
 	
-	collection := session.DB(DATABASE).C(PARTICIPANTS)
+	collection := session.DB(dbName).C(tableName)
 	err := collection.Remove(bson.M{"no": id, "event": eventId})
 	if err != nil {
 		fmt.Println(err)

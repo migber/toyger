@@ -21,6 +21,12 @@ var routes = Routes {
 		"/",
 		Hanlder,
 	},
+	Route{
+		"Main",
+		"GET",
+		"/health",
+		HealthCheck,
+	},
 
 	// Teams 
 	Route{

@@ -12,13 +12,24 @@ import (
 	m "toyger/models/events"
 	"github.com/gorilla/mux"
 )
+
+const DATABASE = "toyger"
+const TEAMS = "teams"
+const EVENTS = "events"
+const COMMISSAIRES = "commissaires"
+const STAGES = "stages"
+const SPRINTS = "sprints"
+const CYCLISTS = "cyclist"
+const PARTICIPANTS = "participants"
+const RACECOMMISSAIRE = "racecommissaire"
+
 // HealtchCheck handler
-func HealtchCheck(w http.ResponseWriter, r *http.Request) {
+func HealthCheck(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Hey I am working here %s!", html.EscapeString(r.URL.Path))
 }
 // Hanlder main handler
 func Hanlder(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hello, %q", html.EscapeString(r.URL.Path))
+	fmt.Fprintf(w, "Hello, %s", html.EscapeString(r.URL.Path))
 }
 
 // TeamHandler return one team handler
@@ -36,7 +47,7 @@ func TeamHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		team := Models.GetTeam(teamID, connection())
+		team := Models.GetTeam(teamID, connection(), DATABASE, TEAMS)
 		w.WriteHeader(http.StatusOK)
 
 		if err := json.NewEncoder(w).Encode(team); err != nil {
@@ -54,7 +65,7 @@ func TeamsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json;charset=UTF-8")	
 	if (validToken){
 		w.WriteHeader(http.StatusOK)
-		if err := json.NewEncoder(w).Encode(Models.GetTeamsList(connection())); err != nil {
+		if err := json.NewEncoder(w).Encode(Models.GetTeamsList(connection(), DATABASE, TEAMS)); err != nil {
 			panic(err)
 		}
 	} else {
@@ -79,7 +90,7 @@ func TeamCreateHandler(w http.ResponseWriter, r *http.Request){
 				return
 			}
 		}
-		t := Models.CreateTeam(team, connection())
+		t := Models.CreateTeam(team, connection(), DATABASE, TEAMS)
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		w.WriteHeader(http.StatusCreated)
 	
@@ -112,13 +123,13 @@ func TeamDeleteHandler(w http.ResponseWriter, r *http.Request){
 			return
 		}
 	
-		err := Models.DeleteTeam(teamID, connection())
+		err := Models.DeleteTeam(teamID, connection(), DATABASE, TEAMS)
 		if err != nil {
 			w.WriteHeader(http.StatusNotFound)
 		}
 		w.WriteHeader(http.StatusOK)
 	
-		if err := json.NewEncoder(w).Encode(Models.GetTeamsList(connection())); err != nil {
+		if err := json.NewEncoder(w).Encode(Models.GetTeamsList(connection(), DATABASE, TEAMS)); err != nil {
 			http.Error(w, err.Error(), 500)
 			return
 		}
@@ -160,7 +171,7 @@ func TeamUpdateHandler(w http.ResponseWriter, r *http.Request){
 			}
 		}
 	
-		t := Models.UpdateTeam(teamID, team, connection())
+		t := Models.UpdateTeam(teamID, team, connection(), DATABASE, TEAMS)
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	
 		w.Header().Set("Location", r.URL.String())
@@ -250,7 +261,8 @@ func CyclistCreateHandler(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusConflict)
 		} else {
 			w.WriteHeader(http.StatusOK)	
-			updateErr := Models.InsertRider(teamID, c.UCIID, connection())
+			updateErr := Models.InsertRider(teamID, c.UCIID, connection(),
+										    DATABASE, TEAMS)
 			if updateErr != nil {
 				fmt.Println("Something went wrong.")
 			}
@@ -340,7 +352,8 @@ func CyclistDeleteHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			w.WriteHeader(http.StatusNotFound)
 		}
-		err = Models.DeleteRider(teamID, cyclistID, connection())
+		err = Models.DeleteRider(teamID, cyclistID, connection(),
+								DATABASE, TEAMS)
 		if err != nil{
 			fmt.Println(fmt.Errorf("%s", err))
 		}
@@ -544,7 +557,7 @@ func EventsHandler(w http.ResponseWriter, r *http.Request) {
 	if (validToken){
 		w.Header().Set("Content-Type", "application/json;charset=UTF-8")
 		w.WriteHeader(http.StatusOK)
-		if err := json.NewEncoder(w).Encode(m.GetEventsList(connection())); err != nil {
+		if err := json.NewEncoder(w).Encode(m.GetEventsList(connection(), DATABASE, EVENTS)); err != nil {
 			panic(err)
 		}
 	} else {
@@ -566,7 +579,7 @@ func EventHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	
-		event := m.GetEvent(eventId, connection())
+		event := m.GetEvent(eventId, connection(), DATABASE, EVENTS)
 		w.WriteHeader(http.StatusOK)
 	
 		if err := json.NewEncoder(w).Encode(event); err != nil {
@@ -595,7 +608,7 @@ func EventCreateHandler(w http.ResponseWriter, r *http.Request) {
 				return
 			 }
 		 }
-		 e := m.CreateEvent(event, connection())
+		 e := m.CreateEvent(event, connection(), DATABASE, EVENTS)
 		 w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		 w.WriteHeader(http.StatusCreated)
 	
@@ -628,13 +641,13 @@ func EventDeleteHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	
-		err := m.DeleteEvent(eventId, connection())
+		err := m.DeleteEvent(eventId, connection(), DATABASE, EVENTS)
 		if err != nil {
 			w.WriteHeader(http.StatusNotFound)
 		}
 		w.WriteHeader(http.StatusOK)
 	
-		if err := json.NewEncoder(w).Encode(m.GetEventsList(connection())); err != nil {
+		if err := json.NewEncoder(w).Encode(m.GetEventsList(connection(), DATABASE, EVENTS)); err != nil {
 			http.Error(w, err.Error(), 500)
 			return
 		}
@@ -677,7 +690,7 @@ func EventUpdateHandler(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	
-		e := m.UpdateEvent(eventId, event, connection())
+		e := m.UpdateEvent(eventId, event, connection(), DATABASE, EVENTS)
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	
 		w.Header().Set("Location", r.URL.String())
@@ -700,7 +713,8 @@ func ParticipantsHandler(w http.ResponseWriter, r *http.Request) {
 	
 		w.Header().Set("Content-Type", "application/json;charset=UTF-8")
 		w.WriteHeader(http.StatusOK)
-		if err := json.NewEncoder(w).Encode(m.GetParticipantsList(eventId, connection())); err != nil {
+		if err := json.NewEncoder(w).Encode(m.GetParticipantsList(eventId, connection(),
+											DATABASE, PARTICIPANTS)); err != nil {
 			panic(err)
 		}
 	} else {
@@ -729,7 +743,8 @@ func ParticipantHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	
-		participant := m.GetParticipant(eventId, participantNo, connection())
+		participant := m.GetParticipant(eventId, participantNo, connection(),
+										DATABASE, PARTICIPANTS)
 		w.WriteHeader(http.StatusOK)
 	
 		if err := json.NewEncoder(w).Encode(participant); err != nil {
@@ -762,13 +777,14 @@ func ParticipantCreateHandler(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 		
-		p := m.CreateParticipant(eventId, participant, connection())
+		p := m.CreateParticipant(eventId, participant, connection(),
+								DATABASE, PARTICIPANTS)
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		if strconv.Itoa(p.No) == ""{
 			w.WriteHeader(http.StatusConflict)
 		} else {
 			w.WriteHeader(http.StatusOK)	
-			updateErr := m.InsertEventParticipants(eventId, p.No, connection())
+			updateErr := m.InsertEventParticipants(eventId, p.No, connection(), DATABASE, EVENTS)
 			if updateErr != nil {
 				fmt.Println("Something went wrong.")
 			}
@@ -805,17 +821,20 @@ func ParticipantDeleteHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	
-		err := m.DeleteParticipant(eventId, participantNo, connection())
+		err := m.DeleteParticipant(eventId, participantNo, connection(),
+								  DATABASE, PARTICIPANTS)
 		if err != nil {
 			w.WriteHeader(http.StatusNotFound)
 		}
-		err = m.DeleteEventParticipant(eventId, participantNo, connection())
+		err = m.DeleteEventParticipant(eventId, participantNo, connection(),
+									   DATABASE, EVENTS)
 		if err != nil{
 			fmt.Println(fmt.Errorf("%s", err))
 		}
 		w.WriteHeader(http.StatusOK)
 	
-		if err := json.NewEncoder(w).Encode(m.GetParticipantsList(eventId, connection())); err != nil {
+		if err := json.NewEncoder(w).Encode(m.GetParticipantsList(eventId, connection(),
+										    DATABASE, PARTICIPANTS)); err != nil {
 			http.Error(w, err.Error(), 500)
 			return
 		}
@@ -861,7 +880,8 @@ func ParticipantUpdateHandler(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	
-		p := m.UpdateParticipant(eventId, participantNo, particicipant, connection())
+		p := m.UpdateParticipant(eventId, participantNo, particicipant, connection(),
+								DATABASE, PARTICIPANTS)
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	
 		w.Header().Set("Location", r.URL.String())
@@ -884,7 +904,8 @@ func StagesHandler(w http.ResponseWriter, r *http.Request) {
 	
 		w.Header().Set("Content-Type", "application/json;charset=UTF-8")
 		w.WriteHeader(http.StatusOK)
-		if err := json.NewEncoder(w).Encode(m.GetStageList(eventId, connection())); err != nil {
+		if err := json.NewEncoder(w).Encode(m.GetStageList(eventId, connection(),
+										   DATABASE, STAGES)); err != nil {
 			panic(err)
 		}
 	} else {
@@ -912,7 +933,8 @@ func StageHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	
-		stage := m.GetStage(eventId, intStageId, connection())
+		stage := m.GetStage(eventId, intStageId, connection(),
+							DATABASE, STAGES)
 		w.WriteHeader(http.StatusOK)
 	
 		if err := json.NewEncoder(w).Encode(stage); err != nil {
@@ -945,13 +967,13 @@ func StageCreateHandler(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 		
-		s := m.CreateStage(eventId, stage, connection())
+		s := m.CreateStage(eventId, stage, connection(), DATABASE, STAGES)
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		if strconv.Itoa(s.ID) == ""{
 			w.WriteHeader(http.StatusConflict)
 		} else {
 			w.WriteHeader(http.StatusOK)	
-			updateErr := m.InsertEventStages(eventId, s.ID, connection())
+			updateErr := m.InsertEventStages(eventId, s.ID, connection(), DATABASE, EVENTS)
 			if updateErr != nil {
 				fmt.Println("Something went wrong.")
 			}
@@ -989,17 +1011,18 @@ func StageDeleteHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	
-		err := m.DeleteStage(eventId, intStageId, connection())
+		err := m.DeleteStage(eventId, intStageId, connection(), DATABASE, STAGES)
 		if err != nil {
 			w.WriteHeader(http.StatusNotFound)
 		}
-		err = m.DeleteEventStage(eventId, intStageId, connection())
+		err = m.DeleteEventStage(eventId, intStageId, connection(), DATABASE, EVENTS)
 		if err != nil{
 			fmt.Println(fmt.Errorf("%s", err))
 		}
 		w.WriteHeader(http.StatusOK)
 	
-		if err := json.NewEncoder(w).Encode(m.GetStageList(eventId, connection())); err != nil {
+		if err := json.NewEncoder(w).Encode(m.GetStageList(eventId, connection(),
+														DATABASE, STAGES)); err != nil {
 			http.Error(w, err.Error(), 500)
 			return
 		}	
@@ -1045,7 +1068,8 @@ func StageUpdateHandler(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	
-		s := m.UpdateStage(eventId, intStageId, stage, connection())
+		s := m.UpdateStage(eventId, intStageId, stage, connection(),
+						  DATABASE, STAGES)
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	
 		w.Header().Set("Location", r.URL.String())
@@ -1071,7 +1095,8 @@ func SprintsHandler(w http.ResponseWriter, r *http.Request) {
 	
 		w.Header().Set("Content-Type", "application/json;charset=UTF-8")
 		w.WriteHeader(http.StatusOK)
-		if err := json.NewEncoder(w).Encode(m.GetSprintList(eventId, intStageId, connection())); err != nil {
+		if err := json.NewEncoder(w).Encode(m.GetSprintList(eventId, intStageId, connection(),
+															DATABASE, SPRINTS)); err != nil {
 			panic(err)
 		}
 	} else {
@@ -1104,7 +1129,8 @@ func SprintHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	
-		sprint := m.GetSprint(eventId, intStageId, sprintId, connection())
+		sprint := m.GetSprint(eventId, intStageId, sprintId, connection(),
+							 DATABASE, SPRINTS)
 		w.WriteHeader(http.StatusOK)
 	
 		if err := json.NewEncoder(w).Encode(sprint); err != nil {
@@ -1140,13 +1166,15 @@ func SprintCreateHandler(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 		
-		s := m.CreateSprint(eventId, intStageId, sprint, connection())
+		s := m.CreateSprint(eventId, intStageId, sprint, connection(),
+							DATABASE, SPRINTS)
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		if s.Id == ""{
 			w.WriteHeader(http.StatusConflict)
 		} else {
 			w.WriteHeader(http.StatusOK)	
-			updateErr := m.AddSprints(eventId, intStageId, sprint, connection())
+			updateErr := m.AddSprints(eventId, intStageId, sprint, connection(),
+									 DATABASE, SPRINTS)
 			if updateErr != nil {
 				fmt.Println("Something went wrong.")
 			}
@@ -1184,17 +1212,20 @@ func SprintDeleteHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	
-		err := m.DeleteSprint(eventId, intStageId, sprintId, connection())
+		err := m.DeleteSprint(eventId, intStageId, sprintId, connection(),
+							 DATABASE, SPRINTS)
 		if err != nil {
 			w.WriteHeader(http.StatusNotFound)
 		}
-		err = m.DeleteStageSprint(eventId, intStageId, sprintId, connection())
+		err = m.DeleteStageSprint(eventId, intStageId, sprintId, connection(),
+								 DATABASE, SPRINTS)
 		if err != nil{
 			fmt.Println(fmt.Errorf("%s", err))
 		}
 		w.WriteHeader(http.StatusOK)
 	
-		if err := json.NewEncoder(w).Encode(m.GetSprintList(eventId, intStageId, connection())); err != nil {
+		if err := json.NewEncoder(w).Encode(m.GetSprintList(eventId, intStageId, connection(),
+											DATABASE, SPRINTS)); err != nil {
 			http.Error(w, err.Error(), 500)
 			return
 		}
@@ -1245,9 +1276,11 @@ func SprintUpdateHandler(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	
-		s := m.UpdateSprint(eventId, intStageId, sprintId, sprint, connection())
+		s := m.UpdateSprint(eventId, intStageId, sprintId, sprint, connection(),
+						   DATABASE, SPRINTS)
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-		err = m.UpdateStageSprint(intStageId, sprintId, sprint, connection())
+		err = m.UpdateStageSprint(intStageId, sprintId, sprint, connection(),
+								 DATABASE, SPRINTS)
 		if err != nil{
 			fmt.Println(fmt.Errorf("%s", err))
 		}
@@ -1271,7 +1304,8 @@ func EventCommissairesHandler(w http.ResponseWriter, r *http.Request) {
 	
 		w.Header().Set("Content-Type", "application/json;charset=UTF-8")
 		w.WriteHeader(http.StatusOK)
-		if err := json.NewEncoder(w).Encode(m.GetRaceCommissairesList(eventId, connection())); err != nil {
+		if err := json.NewEncoder(w).Encode(m.GetRaceCommissairesList(eventId, connection(), 
+																	 DATABASE, RACECOMMISSAIRE)); err != nil {
 			panic(err)
 		}	
 	} else {
@@ -1299,7 +1333,8 @@ func EventCommissaireHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	
-		raceCommissaire := m.GetRaceCommissaire(eventId, raceCommId, connection())
+		raceCommissaire := m.GetRaceCommissaire(eventId, raceCommId, connection(),
+												DATABASE, RACECOMMISSAIRE)
 		w.WriteHeader(http.StatusOK)
 	
 		if err := json.NewEncoder(w).Encode(raceCommissaire); err != nil {
@@ -1332,13 +1367,13 @@ func EventCommissaireCreateHandler(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 		
-		s := m.CreateRaceCommissaire(eventId, raceCommissaire, connection())
+		s := m.CreateRaceCommissaire(eventId, raceCommissaire, connection(), DATABASE, RACECOMMISSAIRE)
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		if s.Commissaire.UCIID == ""{
 			w.WriteHeader(http.StatusConflict)
 		} else {
 			w.WriteHeader(http.StatusOK)	
-			updateErr := m.InsertEventCommissaire(eventId, s.Commissaire.UCIID, connection())
+			updateErr := m.InsertEventCommissaire(eventId, s.Commissaire.UCIID, connection(), DATABASE, EVENTS)
 			if updateErr != nil {
 				fmt.Println("Something went wrong.")
 			}
@@ -1374,17 +1409,17 @@ func EventCommissaireDeleteHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	
-		err := m.DeleteRaceCommissaire(eventId, rcId, connection())
+		err := m.DeleteRaceCommissaire(eventId, rcId, connection(), DATABASE, RACECOMMISSAIRE)
 		if err != nil {
 			w.WriteHeader(http.StatusNotFound)
 		}
-		err = m.DeleteEventCommissaire(eventId, rcId, connection())
+		err = m.DeleteEventCommissaire(eventId, rcId, connection(), DATABASE, EVENTS)
 		if err != nil{
 			fmt.Println(fmt.Errorf("%s", err))
 		}
 		w.WriteHeader(http.StatusOK)
 	
-		if err := json.NewEncoder(w).Encode(m.GetRaceCommissairesList(eventId, connection())); err != nil {
+		if err := json.NewEncoder(w).Encode(m.GetRaceCommissairesList(eventId, connection(), DATABASE, RACECOMMISSAIRE)); err != nil {
 			http.Error(w, err.Error(), 500)
 			return
 		}
@@ -1429,7 +1464,7 @@ func EventCommissaireUpdateHandler(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	
-		rc := m.UpdateRaceCommissaire(eventId, commissaireId, raceCommiss, connection())
+		rc := m.UpdateRaceCommissaire(eventId, commissaireId, raceCommiss, connection(), DATABASE, RACECOMMISSAIRE)
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	
 		w.Header().Set("Location", r.URL.String())
