@@ -12,3 +12,7 @@ Software for road race events of cycling.
 - `go get github.com/dgrijalva/jwt-go`
 - `go get gopkg.in/square/go-jose.v2`
 - `go get github.com/auth0-community/go-auth0`
+- `go get -u github.com/cweill/gotests/...`
+
+### Run tests
+`go test -o tests`
