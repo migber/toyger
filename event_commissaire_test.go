@@ -29,7 +29,7 @@ func TestEventCommissaireCreateMethod(t *testing.T){
 	}
 
 	createdEventCommissaire := m.CreateRaceCommissaire(globalEventId, raceCommissaire,
-													   ConnectionTesting(), TESTING, RACECOMMISSAIRE)
+								 ConnectionTesting(), TESTING, RACECOMMISSAIRE)
 	found := m.GetRaceCommissaire(globalEventId, createdEventCommissaire.Commissaire.UCIID,
 								 ConnectionTesting(),
 								 TESTING, RACECOMMISSAIRE)
@@ -46,7 +46,7 @@ func TestRaceCommissaireGetList(t *testing.T) {
 	fmt.Println("TESTING: EVENT RACE COMMISSAIRE LIST")
 
 	raceCommissairesList := m.GetRaceCommissairesList(globalEventId, ConnectionTesting(),
-													  TESTING, RACECOMMISSAIRE)
+							  TESTING, RACECOMMISSAIRE)
 	if (len(raceCommissairesList) == 0){
 		t.Error("Should be not empty race commissaire list")
 	}
@@ -56,12 +56,13 @@ func TestEventCommissaireUpdate(t *testing.T){
 	
 	fmt.Println("TESTING: EVENT COMMISSAIRE UPDATE")
 	foundRaceCommissaire := m.GetRaceCommissaire(globalEventId, deleteEvenCommissairetId,
-												 ConnectionTesting(), TESTING, RACECOMMISSAIRE)
+							  ConnectionTesting(), TESTING, RACECOMMISSAIRE)
 	beforePositionName := foundRaceCommissaire.Position[0].Name
 	foundRaceCommissaire.Position[0].Name = "Finish judge"
-	updateRaceCommissaire := m.UpdateRaceCommissaire(globalEventId, foundRaceCommissaire.Commissaire.UCIID,
-													 foundRaceCommissaire,
-													 ConnectionTesting(), TESTING, RACECOMMISSAIRE)
+	updateRaceCommissaire := m.UpdateRaceCommissaire(globalEventId, 
+							   foundRaceCommissaire.Commissaire.UCIID,
+							   foundRaceCommissaire,
+							   ConnectionTesting(), TESTING, RACECOMMISSAIRE)
 	if(updateRaceCommissaire.Position[0].Name == beforePositionName){
 		t.Error("Should not the same location name")
 	}
@@ -71,7 +72,7 @@ func TestEventRaceCommissaireDelete(t *testing.T){
 
 	fmt.Println("TESTING: EVENT COMMISSAIRE DELETE")
 	err := m.DeleteRaceCommissaire(globalEventId, deleteEvenCommissairetId, 
-									ConnectionTesting(), TESTING, RACECOMMISSAIRE)
+								   ConnectionTesting(), TESTING, RACECOMMISSAIRE)
 	if (err != nil){
 		t.Error("Should delete specified race commissaire")
 	}
