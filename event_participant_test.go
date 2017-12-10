@@ -36,7 +36,7 @@ func TestEventParticipantCreateMethod(t *testing.T){
 	participant.Rider = rider
 
 	createdParticipant := m.CreateParticipant(globalEventId, participant,
-											 ConnectionTesting(), TESTING, PARTICIPANTS)
+							ConnectionTesting(), TESTING, PARTICIPANTS)
 	found := m.GetParticipant(globalEventId, createdParticipant.No,
 							  ConnectionTesting(),
 						      TESTING, PARTICIPANTS)
@@ -53,7 +53,7 @@ func TestEventParticipantGetList(t *testing.T) {
 	fmt.Println("TESTING: EVENT PARTICIPANTS LIST")
 
 	participants := m.GetParticipantsList(globalEventId, ConnectionTesting(),
-										  TESTING, PARTICIPANTS)
+					TESTING, PARTICIPANTS)
 	if (len(participants) == 0){
 		t.Error("Should be not empty event participant`s list")
 	}
@@ -63,12 +63,13 @@ func TestEventParticipantUpdate(t *testing.T){
 	
 	fmt.Println("TESTING: EVENT PARTICIPANT UPDATE")
 	foundParticipant := m.GetParticipant(globalEventId, deleteEvenParticipanttId,
-										 ConnectionTesting(), TESTING, PARTICIPANTS)
+						  ConnectionTesting(), TESTING, PARTICIPANTS)
 	beforeTotalPoints := foundParticipant.TotalPoints
 	foundParticipant.TotalPoints = 23
-	updateParticipant := m.UpdateParticipant(globalEventId, foundParticipant.No,
-											 foundParticipant,
-											 ConnectionTesting(), TESTING, PARTICIPANTS)
+	updateParticipant := m.UpdateParticipant(globalEventId, 
+						   foundParticipant.No,
+						   foundParticipant,
+						   ConnectionTesting(), TESTING, PARTICIPANTS)
 	if(updateParticipant.TotalPoints == beforeTotalPoints){
 		t.Error("Should not the same total points ")
 	}
@@ -78,7 +79,7 @@ func TestEventParticipantDelete(t *testing.T){
 
 	fmt.Println("TESTING: EVENT PARTICIPANT DELETE")
 	err := m.DeleteParticipant(globalEventId, deleteEvenParticipanttId, 
-							   ConnectionTesting(), TESTING, PARTICIPANTS)
+							ConnectionTesting(), TESTING, PARTICIPANTS)
 	if (err != nil){
 		t.Error("Should delete specified participant")
 	}

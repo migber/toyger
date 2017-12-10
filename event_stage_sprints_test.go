@@ -23,7 +23,7 @@ func TestEventStageSprintCreateMethod(t *testing.T){
 	sprint.Winner = 55
 
 	createSprint := m.CreateSprint(globalEventId, globalStageId, sprint,
-								ConnectionTesting(), TESTING, SPRINTS)
+					  ConnectionTesting(), TESTING, SPRINTS)
 	found := m.GetSprint(globalEventId, globalStageId,
 						createSprint.Id, ConnectionTesting(),
 						TESTING, SPRINTS)
@@ -40,8 +40,9 @@ func TestEventStageSprintCreateMethod(t *testing.T){
 func TestEventStageSprintsGetList(t *testing.T) {
 	fmt.Println("TESTING: EVENT STAGE SPRINT`S LIST")
 
-	sprints := m.GetSprintList(globalEventId, globalStageId, ConnectionTesting(),
-							TESTING, SPRINTS)
+	sprints := m.GetSprintList(globalEventId, globalStageId,
+				 ConnectionTesting(),
+				 TESTING, SPRINTS)
 	if (len(sprints) == 0){
 		t.Error("Should be not empty sprint`s list")
 	}
@@ -50,13 +51,15 @@ func TestEventStageSprintsGetList(t *testing.T) {
 func TestEventStageSprintUpdate(t *testing.T){
 	
 	fmt.Println("TESTING: EVENT STAGE SPRINT UPDATE")
-	foundSprint := m.GetSprint(globalEventId, globalStageId, deleteEvenStagetSprintId,
-							 ConnectionTesting(), TESTING, SPRINTS)
+	foundSprint := m.GetSprint(globalEventId, globalStageId, 
+					 deleteEvenStagetSprintId,
+					 ConnectionTesting(), TESTING, SPRINTS)
 	beforeCategory := foundSprint.Category
 	foundSprint.Category = "Category 3"
-	updateSprint := m.UpdateSprint(globalEventId, globalStageId, foundSprint.Id,
-								   foundSprint,
-								   ConnectionTesting(), TESTING, SPRINTS)
+	updateSprint := m.UpdateSprint(globalEventId, globalStageId,
+					  foundSprint.Id,
+					  foundSprint,
+					  ConnectionTesting(), TESTING, SPRINTS)
 	if(updateSprint.Category == beforeCategory){
 		t.Error("Should not the same sprint`s category ")
 	}
@@ -65,7 +68,8 @@ func TestEventStageSprintUpdate(t *testing.T){
 func TestEventStageSprintDelete(t *testing.T){
 
 	fmt.Println("TESTING: EVENT STAGE SPRINT`S DELETE")
-	err := m.DeleteSprint(globalEventId, globalStageId, deleteEvenStagetSprintId, 
+	err := m.DeleteSprint(globalEventId, globalStageId, 
+						 deleteEvenStagetSprintId, 
 						 ConnectionTesting(), TESTING, SPRINTS)
 	if (err != nil){
 		t.Error("Should delete specified sprint")

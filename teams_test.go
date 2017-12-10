@@ -48,12 +48,12 @@ func TestTeamUpdate(t *testing.T){
 	
 	fmt.Println("TESTING: TEAM UPDATE")
 	foundTeam := m.GetTeam(deleteTeamId,
-						  ConnectionTesting(), TESTING, TEAMS)
+				  ConnectionTesting(), TESTING, TEAMS)
 	beforeName := foundTeam.Name
 	foundTeam.Name = "Team Name Updated"
 	updateTeam := m.UpdateTeam(foundTeam.Id,
-								foundTeam,
-								ConnectionTesting(), TESTING, TEAMS)
+					foundTeam,
+					ConnectionTesting(), TESTING, TEAMS)
 	if(updateTeam.Name == beforeName){
 		t.Error("Should not the same team name ")
 	}
@@ -62,11 +62,13 @@ func TestTeamUpdate(t *testing.T){
 func TestTeamsRidersInsertion(t *testing.T){
 	fmt.Println("TESTING: TEAMS RIDERS INSERT INSIDE")
 	riderId:= "12345678912"
-	err := m.InsertRider(deleteTeamId, riderId, ConnectionTesting(), TESTING, TEAMS)
+	err := m.InsertRider(deleteTeamId, riderId, 
+			 ConnectionTesting(), TESTING, TEAMS)
 	if err != nil{
 		t.Error("Should update rider in teams riders` list")
 	}
-	getTeam := m.GetTeam(deleteTeamId, ConnectionTesting(), TESTING, TEAMS)
+	getTeam := m.GetTeam(deleteTeamId, 
+				ConnectionTesting(), TESTING, TEAMS)
 	index := m.FindCyclist(getTeam.Riders, riderId)
 	if(getTeam.Riders[index] != riderId){
 		t.Error("Should found inserted rider")
@@ -76,11 +78,13 @@ func TestTeamsRidersInsertion(t *testing.T){
 func TestTeamsRidersDeletion(t *testing.T){
 	fmt.Println("TESTING: TEAMS RIDERS DELETE INSIDE")
 	riderId:= "12345678912"
-	err := m.DeleteRider(deleteTeamId, riderId, ConnectionTesting(), TESTING, TEAMS)
+	err := m.DeleteRider(deleteTeamId, riderId,
+			 ConnectionTesting(), TESTING, TEAMS)
 	if err != nil{
 		t.Error("Should update riders list in team")
 	}
-	getTeam := m.GetTeam(deleteTeamId, ConnectionTesting(), TESTING, TEAMS)
+	getTeam := m.GetTeam(deleteTeamId, 
+				ConnectionTesting(), TESTING, TEAMS)
 	index := m.FindCyclist(getTeam.Riders, riderId)
 	if(index!= -1){
 		t.Error("Should not found rider")

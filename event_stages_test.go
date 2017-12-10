@@ -27,7 +27,7 @@ func TestEventStageCreateMethod(t *testing.T){
 	stage.TimeLimit = 8
 
 	createStage := m.CreateStage(globalEventId, stage,
-								ConnectionTesting(), TESTING, STAGES)
+					 ConnectionTesting(), TESTING, STAGES)
 	found := m.GetStage(globalEventId, stage.ID,
 						ConnectionTesting(),
 						TESTING, STAGES)
