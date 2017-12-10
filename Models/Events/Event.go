@@ -46,7 +46,7 @@ func CreateEvent(e Event, session *mgo.Session, dbName string, dbTable string) E
 	
 	collection := session.DB(dbName).C(dbTable)
 	if err := collection.Insert(event); err != nil {
-		panic(err)
+		fmt.Println(err)
 	}
 	return event
 }
@@ -58,7 +58,7 @@ func GetEventsList(session *mgo.Session, dbName string, tableName string) Events
 	c := session.DB(dbName).C(tableName)
 	err := c.Find(nil).All(&events)
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
 	}
 	return events
 }
@@ -70,7 +70,7 @@ func GetEvent(id string, session *mgo.Session, dbName string, tableName string) 
 	collection := session.DB(dbName).C(tableName)
 	err := collection.Find(bson.M{"id": id}).One(&e)
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
 	}
 	return e
 }
@@ -85,7 +85,7 @@ func UpdateEvent(id string, e Event, session *mgo.Session, dbName string, tableN
 
 	err := collection.Find(bson.M{"id": id}).One(&updateEvent)
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
 	}
 
 	updateEvent.Name = e.Name
@@ -100,7 +100,7 @@ func UpdateEvent(id string, e Event, session *mgo.Session, dbName string, tableN
 	updateEvent.Commissaires = e.Commissaires
 
 	if err := collection.Update(bson.M{"id": id}, updateEvent); err != nil {
-		panic(err)
+		fmt.Println(err)
 	}
 	
 	return updateEvent
@@ -109,7 +109,6 @@ func UpdateEvent(id string, e Event, session *mgo.Session, dbName string, tableN
 func DeleteEvent(id string, session *mgo.Session, dbName string, tableName string) error {
 	
 	defer session.Close()
-	
 	collection := session.DB(dbName).C(tableName)
 	err := collection.Remove(bson.M{"id": id})
 	if err != nil {
