@@ -22,15 +22,15 @@ func TestEventCommissaireCreateMethod(t *testing.T){
 	commissaire.Nationality = "German"
 	commissaire.UCICategory = "Nationl Commissaire"
 	raceCommissaire.Commissaire = commissaire
-	raceCommissaire.Event = globalEventId
+	raceCommissaire.Event = globaleventID
 	raceCommissaire.Position = []m.Position{
 		{ Stage: "1", Name: "Timekeeper"},
 		{ Stage: "2", Name: "Finish judge"},
 	}
 
-	createdEventCommissaire := m.CreateRaceCommissaire(globalEventId, raceCommissaire,
+	createdEventCommissaire := m.CreateRaceCommissaire(globaleventID, raceCommissaire,
 								 ConnectionTesting(), TESTING, RACECOMMISSAIRE)
-	found := m.GetRaceCommissaire(globalEventId, createdEventCommissaire.Commissaire.UCIID,
+	found := m.GetRaceCommissaire(globaleventID, createdEventCommissaire.Commissaire.UCIID,
 								 ConnectionTesting(),
 								 TESTING, RACECOMMISSAIRE)
 	deleteEvenCommissairetId = createdEventCommissaire.Commissaire.UCIID
@@ -45,7 +45,7 @@ func TestEventCommissaireCreateMethod(t *testing.T){
 func TestRaceCommissaireGetList(t *testing.T) {
 	fmt.Println("TESTING: EVENT RACE COMMISSAIRE LIST")
 
-	raceCommissairesList := m.GetRaceCommissairesList(globalEventId, ConnectionTesting(),
+	raceCommissairesList := m.GetRaceCommissairesList(globaleventID, ConnectionTesting(),
 							  TESTING, RACECOMMISSAIRE)
 	if (len(raceCommissairesList) == 0){
 		t.Error("Should be not empty race commissaire list")
@@ -55,11 +55,11 @@ func TestRaceCommissaireGetList(t *testing.T) {
 func TestEventCommissaireUpdate(t *testing.T){
 	
 	fmt.Println("TESTING: EVENT COMMISSAIRE UPDATE")
-	foundRaceCommissaire := m.GetRaceCommissaire(globalEventId, deleteEvenCommissairetId,
+	foundRaceCommissaire := m.GetRaceCommissaire(globaleventID, deleteEvenCommissairetId,
 							  ConnectionTesting(), TESTING, RACECOMMISSAIRE)
 	beforePositionName := foundRaceCommissaire.Position[0].Name
 	foundRaceCommissaire.Position[0].Name = "Finish judge"
-	updateRaceCommissaire := m.UpdateRaceCommissaire(globalEventId, 
+	updateRaceCommissaire := m.UpdateRaceCommissaire(globaleventID, 
 							   foundRaceCommissaire.Commissaire.UCIID,
 							   foundRaceCommissaire,
 							   ConnectionTesting(), TESTING, RACECOMMISSAIRE)
@@ -71,7 +71,7 @@ func TestEventCommissaireUpdate(t *testing.T){
 func TestEventRaceCommissaireDelete(t *testing.T){
 
 	fmt.Println("TESTING: EVENT COMMISSAIRE DELETE")
-	err := m.DeleteRaceCommissaire(globalEventId, deleteEvenCommissairetId, 
+	err := m.DeleteRaceCommissaire(globaleventID, deleteEvenCommissairetId, 
 								   ConnectionTesting(), TESTING, RACECOMMISSAIRE)
 	if (err != nil){
 		t.Error("Should delete specified race commissaire")

@@ -60,6 +60,38 @@ var routes = Routes {
 		TeamUpdateHandler,
 	},
 
+	// Cyclist alone
+	Route{
+		"Cyclistss",
+		"GET",
+		"/api/cyclists",
+		CyclistsAloneHandler,
+	},
+	Route{
+		"CyclistAlone",
+		"GET",
+		"/api/cyclists/{cyclistId}",
+		CyclistAloneHandler,
+	},
+	Route{
+		"CyclistAloneCreate",
+		"POST",
+		"/api/cyclists",
+		CyclistsAloneCreateHandler,
+	},
+	Route{
+		"CyclistAloneDelete",
+		"DELETE",
+		"/api/cyclists/{cyclistId}",
+		CyclistsAloneDeleteHandler,
+	},
+	Route{
+		"CyclistAloneUpdate",
+		"PUT",
+		"/api/cyclists/{cyclistId}",
+		CyclistAloneUpdateHandler,
+	},
+
 	// Cyclists 
 	Route{
 		"Cyclists",
@@ -102,7 +134,7 @@ var routes = Routes {
 	Route{
 		"CommissaireGet",
 		"GET",
-		"/api/commissaires/{commissaireId}",
+		"/api/commissaires/{commissaireID}",
 		CommissaireHandler,
 	},
 	Route{
@@ -114,13 +146,13 @@ var routes = Routes {
 	Route{
 		"CommissaireDelete",
 		"DELETE",
-		"/api/commissaires/{commissaireId}",
+		"/api/commissaires/{commissaireID}",
 		CommissaireDeleteHandler,
 	},
 	Route{
 		"CommissaireUpdate",
 		"PUT",
-		"/api/commissaires/{commissaireId}",
+		"/api/commissaires/{commissaireID}",
 		CommissaireUpdateHandler,
 	},
 
@@ -166,7 +198,7 @@ var routes = Routes {
 	Route{
 		"Event Get",
 		"GET",
-		"/api/events/{eventId}",
+		"/api/events/{eventID}",
 		EventHandler,
 	},
 	Route{
@@ -178,13 +210,13 @@ var routes = Routes {
 	Route{
 		"EventDelete",
 		"DELETE",
-		"/api/events/{eventId}",
+		"/api/events/{eventID}",
 		EventDeleteHandler,
 	},
 	Route{
 		"EventUpdate",
 		"PUT",
-		"/api/events/{eventId}",
+		"/api/events/{eventID}",
 		EventUpdateHandler,
 	},
 
@@ -192,31 +224,31 @@ var routes = Routes {
 	Route{
 		"Participants",
 		"GET",
-		"/api/events/{eventId}/participants",
+		"/api/events/{eventID}/participants",
 		ParticipantsHandler,
 	},
 	Route{
 		"Participant",
 		"GET",
-		"/api/events/{eventId}/participants/{participantId}",
+		"/api/events/{eventID}/participants/{participantId}",
 		ParticipantHandler,
 	},
 	Route{
 		"ParticipantCreate",
 		"POST",
-		"/api/events/{eventId}/participants",
+		"/api/events/{eventID}/participants",
 		ParticipantCreateHandler,
 	},
 	Route{
 		"ParticipantDelete",
 		"DELETE",
-		"/api/events/{eventId}/participants/{participantId}",
+		"/api/events/{eventID}/participants/{participantId}",
 		ParticipantDeleteHandler,
 	},
 	Route{
 		"ParticipantUpdate",
 		"PUT",
-		"/api/events/{eventId}/participants/{participantId}",
+		"/api/events/{eventID}/participants/{participantId}",
 		ParticipantUpdateHandler,
 	},
 
@@ -224,31 +256,31 @@ var routes = Routes {
 	Route{
 		"Stages",
 		"GET",
-		"/api/events/{eventId}/stages",
+		"/api/events/{eventID}/stages",
 		StagesHandler,
 	},
 	Route{
 		"Stage",
 		"GET",
-		"/api/events/{eventId}/stages/{stageId}",
+		"/api/events/{eventID}/stages/{stageID}",
 		StageHandler,
 	},
 	Route{
 		"StageCreate",
 		"POST",
-		"/api/events/{eventId}/stages",
+		"/api/events/{eventID}/stages",
 		StageCreateHandler,
 	},
 	Route{
 		"StageDelete",
 		"DELETE",
-		"/api/events/{eventId}/stages/{stagesId}",
+		"/api/events/{eventID}/stages/{stagesId}",
 		StageDeleteHandler,
 	},
 	Route{
 		"StageUpdate",
 		"PUT",
-		"/api/events/{eventId}/stages/{stageId}",
+		"/api/events/{eventID}/stages/{stageID}",
 		StageUpdateHandler,
 	},
 
@@ -256,31 +288,31 @@ var routes = Routes {
 	Route{
 		"Sprints",
 		"GET",
-		"/api/events/{eventId}/stages/{stageId}/sprints",
+		"/api/events/{eventID}/stages/{stageID}/sprints",
 		SprintsHandler,
 	},
 	Route{
 		"Stage",
 		"GET",
-		"/api/events/{eventId}/stages/{stageId}/sprints/{sprintId}",
+		"/api/events/{eventID}/stages/{stageID}/sprints/{sprintID}",
 		SprintHandler,
 	},
 	Route{
 		"SprintCreate",
 		"POST",
-		"/api/events/{eventId}/stages/{stageId}/sprints",
+		"/api/events/{eventID}/stages/{stageID}/sprints",
 		SprintCreateHandler,
 	},
 	Route{
 		"SprintDelete",
 		"DELETE",
-		"/api/events/{eventId}/stages/{stageId}/sprints/{sprintId}}",
+		"/api/events/{eventID}/stages/{stageID}/sprints/{sprintID}}",
 		SprintDeleteHandler,
 	},
 	Route{
 		"SprintUpdate",
 		"PUT",
-		"/api/events/{eventId}/stages/{stageId}/sprints/{sprintId}",
+		"/api/events/{eventID}/stages/{stageID}/sprints/{sprintID}",
 		SprintUpdateHandler,
 	},
 
@@ -288,31 +320,31 @@ var routes = Routes {
 	Route{
 		"Event commissaires",
 		"GET",
-		"/api/events/{eventId}/commissaires",
+		"/api/events/{eventID}/commissaires",
 		EventCommissairesHandler,
 	},
 	Route{
 		"Event commissaire",
 		"GET",
-		"/api/events/{eventId}/commissaires/{commissaireId}",
+		"/api/events/{eventID}/commissaires/{commissaireID}",
 		EventCommissaireHandler,
 	},
 	Route{
 		"Event commissaire create",
 		"POST",
-		"/api/events/{eventId}/commissaires",
+		"/api/events/{eventID}/commissaires",
 		EventCommissaireCreateHandler,
 	},
 	Route{
 		"Event commissaire delete",
 		"DELETE",
-		"/api/events/{eventId}/commissaires/{commissaireId}",
+		"/api/events/{eventID}/commissaires/{commissaireID}",
 		EventCommissaireDeleteHandler,
 	},
 	Route{
 		"Event commissaire update",
 		"PUT",
-		"/api/events/{eventId}/commissaires/{commissaireId}",
+		"/api/events/{eventID}/commissaires/{commissaireID}",
 		EventCommissaireUpdateHandler,
 	},
 }

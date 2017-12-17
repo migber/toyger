@@ -28,7 +28,7 @@ type Teams []Team
 var TEAMS = "teams"
 
 func CreateTeam(t Team, session *mgo.Session,
-	dbName string, tableName string) Team {
+	dbName string, tableName string) (Team, error){
 
 	var team Team
 	defer session.Close() 
@@ -41,40 +41,41 @@ func CreateTeam(t Team, session *mgo.Session,
 	team.Riders = t.Riders
 	
 	collection := session.DB(dbName).C(tableName)
-	if err := collection.Insert(team); err != nil {
-		panic(err)
+	var err error
+	if err = collection.Insert(team); err != nil {
+		fmt.Println(err)
 	}
-	return t
+	return t, err
 }
 
-func GetTeamsList(session *mgo.Session, dbName string, tableName string) Teams {
+func GetTeamsList(session *mgo.Session, dbName string, tableName string) (Teams, error) {
 
 	teams := Teams{}
 	defer session.Close()
 	c := session.DB(dbName).C(tableName)
 	err := c.Find(nil).All(&teams)
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
 	}
-	return teams
+	return teams, err
 }
 
 func GetTeam(id string, session *mgo.Session,
-	dbName string, tableName string) Team {
+	dbName string, tableName string) (Team, error) {
 
 	var t Team
 	defer session.Close()
 	collection := session.DB(dbName).C(tableName)
 	err := collection.Find(bson.M{"id": id}).One(&t)
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
 	}
 
-	return t
+	return t, err
 }
 
 func UpdateTeam(uid string, t Team, session *mgo.Session,
-	dbName string, tableName string) Team {
+	dbName string, tableName string) (Team, error) {
 
 	var updateT Team
 
@@ -84,7 +85,8 @@ func UpdateTeam(uid string, t Team, session *mgo.Session,
 
 	err := collection.Find(bson.M{"id": uid}).One(&updateT)
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
+		return updateT, err
 	}
 
 	updateT.Name = t.Name
@@ -94,12 +96,12 @@ func UpdateTeam(uid string, t Team, session *mgo.Session,
 	updateT.Manager.Phone = t.Manager.Phone
 	updateT.Manager.Nationality = t.Manager.Nationality
 	updateT.Riders = t.Riders
-
-	if err := collection.Update(bson.M{"id": uid}, updateT); err != nil {
-		panic(err)
+	var err2 error
+	if err2 = collection.Update(bson.M{"id": uid}, updateT); err != nil {
+		fmt.Println(err)
 	}
 	
-	return updateT
+	return updateT, err2
 }
 
 func DeleteTeam(uid string, session *mgo.Session,
@@ -143,7 +145,8 @@ func InsertRider(id string, riderId string, session *mgo.Session,
 	riders := updatedTeam.Riders
 	newRiders := append(riders, riderId)
 	updatedTeam.Riders = newRiders
-	if err := collection.Update(bson.M{"id": id}, updatedTeam); err != nil {
+	err = collection.Update(bson.M{"id": id}, updatedTeam)
+	if err != nil {
 		return err
 	}
 	return nil
@@ -174,7 +177,6 @@ func DeleteRider(id string, riderId string, session *mgo.Session,
 	if err := collection.Update(bson.M{"id": id}, updatedTeam); err != nil {
 		fmt.Println(err)
 		return err
-	} else {
-		return nil
 	}
+	return nil
 }

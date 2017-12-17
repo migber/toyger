@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
+	"errors"
 )
 type Position struct{
 	Stage	string	`json:"stage"`
@@ -18,32 +19,34 @@ type RaceCommissaire struct{
 type RaceCommissaires []RaceCommissaire	
 var RACECOMMISSAIRES = "racecommissaires"
 
-func CreateRaceCommissaire(eventId string, c RaceCommissaire, session *mgo.Session,
-						 dbName string, tableName string) RaceCommissaire {
+func CreateRaceCommissaire(eventID string, c RaceCommissaire, session *mgo.Session,
+						 dbName string, tableName string) (RaceCommissaire, error) {
 	var raceCom RaceCommissaire
 	defer session.Close() 
-
-	existingCommi := GetRaceCommissaireInside(eventId, c.Commissaire.UCIID, session, dbName, tableName)
+	var err error
+	existingCommi := GetRaceCommissaireInside(eventID, c.Commissaire.UCIID, session, dbName, tableName)
 	if existingCommi != nil {
 		raceCom.Commissaire = c.Commissaire
-		raceCom.Event = eventId
+		raceCom.Event = eventID
 		raceCom.Position = c.Position
 		collection := session.DB(dbName).C(tableName)
-		if err := collection.Insert(raceCom); err != nil {
-			panic(err)
+		if err2 := collection.Insert(raceCom); err2 != nil {
+			fmt.Println(err2)
+			err = err2
 		}
 	} else {
 		fmt.Println("User with the same UCIID exists")
+		err = errors.New("User with the same UCIID exists")
 	}
-	return raceCom
+	return raceCom, err
 }
 
-func GetRaceCommissaireInside(eventId string, id string, session *mgo.Session,
+func GetRaceCommissaireInside(eventID string, id string, session *mgo.Session,
 							 dbName string, tableName string) error {
 
 	var c RaceCommissaire
 	collection := session.DB(dbName).C(tableName)
-	err := collection.Find(bson.M{"commissaire.uciid": id, "event": eventId}).One(&c)
+	err := collection.Find(bson.M{"commissaire.uciid": id, "event": eventID}).One(&c)
 	// if err != nil {
 	// 	fmt.Println(err)
 	// }
@@ -51,35 +54,35 @@ func GetRaceCommissaireInside(eventId string, id string, session *mgo.Session,
 	return err
 }
 
-func GetRaceCommissairesList(eventId string, session *mgo.Session,
-							dbName string, tableName string) RaceCommissaires {
+func GetRaceCommissairesList(eventID string, session *mgo.Session,
+							dbName string, tableName string) (RaceCommissaires, error) {
 	
 	raceComms := RaceCommissaires{}
 	defer session.Close()
 
 	c := session.DB(dbName).C(tableName)
-	err := c.Find(bson.M{"event": eventId}).All(&raceComms)
+	err := c.Find(bson.M{"event": eventID}).All(&raceComms)
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
 	}
-	return raceComms
+	return raceComms, err
 }
 
-func GetRaceCommissaire(eventId string, id string, session *mgo.Session,
-	dbName string, tableName string) RaceCommissaire {
+func GetRaceCommissaire(eventID string, id string, session *mgo.Session,
+	dbName string, tableName string) (RaceCommissaire, error) {
 
 	var c RaceCommissaire
 	defer session.Close()
 	collection := session.DB(dbName).C(tableName)
-	err := collection.Find(bson.M{"commissaire.uciid": id, "event": eventId}).One(&c)
+	err := collection.Find(bson.M{"commissaire.uciid": id, "event": eventID}).One(&c)
 	if err != nil {
 		fmt.Println(err)
 	}
-	return c
+	return c, err
 }
 
-func UpdateRaceCommissaire(eventId string, id string, raceCom RaceCommissaire, session *mgo.Session,
-	dbName string, tableName string) RaceCommissaire {
+func UpdateRaceCommissaire(eventID string, id string, raceCom RaceCommissaire, session *mgo.Session,
+	dbName string, tableName string) (RaceCommissaire, error) {
 	
 	var updateRaceComm RaceCommissaire
 
@@ -87,27 +90,28 @@ func UpdateRaceCommissaire(eventId string, id string, raceCom RaceCommissaire, s
 	
 	collection := session.DB(dbName).C(tableName)
 
-	err := collection.Find(bson.M{"commissaire.uciid": id, "event": eventId}).One(&updateRaceComm)
+	err := collection.Find(bson.M{"commissaire.uciid": id, "event": eventID}).One(&updateRaceComm)
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
 	}
 	updateRaceComm.Commissaire = raceCom.Commissaire
 	updateRaceComm.Position = raceCom.Position
 
-	if err := collection.Update(bson.M{"commissaire.uciid": id}, updateRaceComm); err != nil {
-		panic(err)
+	if err2 := collection.Update(bson.M{"commissaire.uciid": id}, updateRaceComm); err2 != nil {
+		fmt.Println(err2)
+		err = err2
 	}
 	
-	return updateRaceComm
+	return updateRaceComm, err
 }
 
-func DeleteRaceCommissaire(eventId string, id string, session *mgo.Session,
+func DeleteRaceCommissaire(eventID string, id string, session *mgo.Session,
 	dbName string, tableName string) error {
 	
 	defer session.Close()
 	
 	collection := session.DB(dbName).C(tableName)
-	err := collection.Remove(bson.M{"commissaire.uciid": id, "event": eventId})
+	err := collection.Remove(bson.M{"commissaire.uciid": id, "event": eventID})
 	if err != nil {
 		fmt.Println(err)
 	} else {

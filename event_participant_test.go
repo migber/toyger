@@ -24,7 +24,7 @@ func TestEventParticipantCreateMethod(t *testing.T){
 	rider.UCIID = "98765432189"
 	rider.Coaches = []string {"Manager I", "Manager II"}
 
-	participant.Event = globalEventId
+	participant.Event = globaleventID
 	participant.No = 34
 	participant.Bk = false
 	participant.MountainPoints = 3
@@ -35,9 +35,9 @@ func TestEventParticipantCreateMethod(t *testing.T){
 	participant.U23 = false
 	participant.Rider = rider
 
-	createdParticipant := m.CreateParticipant(globalEventId, participant,
+	createdParticipant := m.CreateParticipant(globaleventID, participant,
 							ConnectionTesting(), TESTING, PARTICIPANTS)
-	found := m.GetParticipant(globalEventId, createdParticipant.No,
+	found := m.GetParticipant(globaleventID, createdParticipant.No,
 							  ConnectionTesting(),
 						      TESTING, PARTICIPANTS)
 	deleteEvenParticipanttId = createdParticipant.No
@@ -52,7 +52,7 @@ func TestEventParticipantCreateMethod(t *testing.T){
 func TestEventParticipantGetList(t *testing.T) {
 	fmt.Println("TESTING: EVENT PARTICIPANTS LIST")
 
-	participants := m.GetParticipantsList(globalEventId, ConnectionTesting(),
+	participants := m.GetParticipantsList(globaleventID, ConnectionTesting(),
 					TESTING, PARTICIPANTS)
 	if (len(participants) == 0){
 		t.Error("Should be not empty event participant`s list")
@@ -62,11 +62,11 @@ func TestEventParticipantGetList(t *testing.T) {
 func TestEventParticipantUpdate(t *testing.T){
 	
 	fmt.Println("TESTING: EVENT PARTICIPANT UPDATE")
-	foundParticipant := m.GetParticipant(globalEventId, deleteEvenParticipanttId,
+	foundParticipant := m.GetParticipant(globaleventID, deleteEvenParticipanttId,
 						  ConnectionTesting(), TESTING, PARTICIPANTS)
 	beforeTotalPoints := foundParticipant.TotalPoints
 	foundParticipant.TotalPoints = 23
-	updateParticipant := m.UpdateParticipant(globalEventId, 
+	updateParticipant := m.UpdateParticipant(globaleventID, 
 						   foundParticipant.No,
 						   foundParticipant,
 						   ConnectionTesting(), TESTING, PARTICIPANTS)
@@ -78,7 +78,7 @@ func TestEventParticipantUpdate(t *testing.T){
 func TestEventParticipantDelete(t *testing.T){
 
 	fmt.Println("TESTING: EVENT PARTICIPANT DELETE")
-	err := m.DeleteParticipant(globalEventId, deleteEvenParticipanttId, 
+	err := m.DeleteParticipant(globaleventID, deleteEvenParticipanttId, 
 							ConnectionTesting(), TESTING, PARTICIPANTS)
 	if (err != nil){
 		t.Error("Should delete specified participant")

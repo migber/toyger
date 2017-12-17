@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
+	"errors"
 )
 
 type Stage struct {
@@ -24,16 +25,16 @@ type Stage struct {
 type Stages []Stage
 var STAGES = "stages"
 
-func CreateStage(eventId string, s Stage, session *mgo.Session,
-	dbName string, tableName string) Stage {
+func CreateStage(eventID string, s Stage, session *mgo.Session,
+	dbName string, tableName string) (Stage, error) {
 	
 	var stage Stage
 	defer session.Close() 
-
-	existsStage := GetStageInside(eventId, s.ID, session, dbName, tableName)
+	var err error
+	existsStage := GetStageInside(eventID, s.ID, session, dbName, tableName)
 	if existsStage != nil {
 		stage.ID = s.ID
-		stage.Event = eventId
+		stage.Event = eventID
 		stage.Name = s.Name
 		stage.Km = s.Km
 		stage.Sprints = s.Sprints
@@ -47,20 +48,22 @@ func CreateStage(eventId string, s Stage, session *mgo.Session,
 		
 		collection := session.DB(dbName).C(tableName)
 		if err := collection.Insert(stage); err != nil {
-			panic(err)
+			fmt.Println(err)
+			return stage, err
 		}
 	} else {
 		fmt.Println("User with the same UCIID exists")
+		err = errors.New("User with the same UCIID exists")
 	}
-	return stage
+	return stage, err
 }
 
-func GetStageInside(eventId string, id int, session *mgo.Session,
+func GetStageInside(eventID string, id int, session *mgo.Session,
 	dbName string, tableName string) error {
 	
 	var s Stage
 	collection := session.DB(dbName).C(tableName)
-	err := collection.Find(bson.M{"id": id, "event": eventId}).One(&s)
+	err := collection.Find(bson.M{"id": id, "event": eventID}).One(&s)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -68,36 +71,36 @@ func GetStageInside(eventId string, id int, session *mgo.Session,
 	return err
 }
 
-func GetStageList(eventId string, session *mgo.Session,
-	dbName string, tableName string) Stages {
+func GetStageList(eventID string, session *mgo.Session,
+	dbName string, tableName string) (Stages, error) {
 	
 	stages := Stages{}
 	defer session.Close()
 
 	c := session.DB(dbName).C(tableName)
-	err := c.Find(bson.M{"event": eventId}).All(&stages)
+	err := c.Find(bson.M{"event": eventID}).All(&stages)
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
 	}
-	return stages
+	return stages, err
 }
 
-func GetStage(eventId string, id int, session *mgo.Session,
-	dbName string, tableName string) Stage {
+func GetStage(eventID string, id int, session *mgo.Session,
+	dbName string, tableName string) (Stage, error) {
 
 	var s Stage
 	defer session.Close()
 	collection := session.DB(dbName).C(tableName)
-	err := collection.Find(bson.M{"id": id, "event": eventId}).One(&s)
+	err := collection.Find(bson.M{"id": id, "event": eventID}).One(&s)
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	return s
+	return s, err
 }
 
-func UpdateStage(eventId string, id int, s Stage, session *mgo.Session,
-	dbName string, tableName string) Stage {
+func UpdateStage(eventID string, id int, s Stage, session *mgo.Session,
+	dbName string, tableName string) (Stage, error) {
 	
 	var updateStage Stage
 
@@ -105,9 +108,10 @@ func UpdateStage(eventId string, id int, s Stage, session *mgo.Session,
 	
 	collection := session.DB(dbName).C(tableName)
 
-	err := collection.Find(bson.M{"id": id, "event": eventId}).One(&updateStage)
+	err := collection.Find(bson.M{"id": id, "event": eventID}).One(&updateStage)
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
+		return updateStage, err
 	}
 	updateStage.Event = s.Event
 	updateStage.Name = s.Name
@@ -121,20 +125,21 @@ func UpdateStage(eventId string, id int, s Stage, session *mgo.Session,
 	updateStage.AfterTimeLimit = s.AfterTimeLimit
 	updateStage.NotStarted = s.NotStarted	
 
-	if err := collection.Update(bson.M{"id": id}, updateStage); err != nil {
-		panic(err)
+	if err2 := collection.Update(bson.M{"id": id}, updateStage); err2 != nil {
+		fmt.Println(err2)
+		err = err2
 	}
 	
-	return updateStage
+	return updateStage, err
 }
 
-func DeleteStage(eventId string, id int, session *mgo.Session,
+func DeleteStage(eventID string, id int, session *mgo.Session,
 	dbName string, tableName string) error {
 	
 	defer session.Close()
 	
 	collection := session.DB(dbName).C(tableName)
-	err := collection.Remove(bson.M{"id": id, "event": eventId})
+	err := collection.Remove(bson.M{"id": id, "event": eventID})
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -143,26 +148,26 @@ func DeleteStage(eventId string, id int, session *mgo.Session,
 	return err
 }
 
-func AddSprints(eventId string, stageId int, s Sprint, session *mgo.Session,
+func AddSprints(eventID string, stageID int, s Sprint, session *mgo.Session,
 	dbName string, tableName string) error {
 	
 	var updateStages Stage
 	defer session.Close()
 	collection := session.DB(dbName).C(tableName)
-	err := collection.Find(bson.M{"id": stageId}).One(&updateStages)
+	err := collection.Find(bson.M{"id": stageID}).One(&updateStages)
 	if err != nil {
 		return err
 	}
 	sprints := updateStages.Sprints
 	newSprints := append(sprints, s)
 	updateStages.Sprints = newSprints
-	if err := collection.Update(bson.M{"id": stageId}, updateStages); err != nil {
+	if err := collection.Update(bson.M{"id": stageID}, updateStages); err != nil {
 		return err
 	}
 	return nil
 }
 
-func DeleteStageSprint(id string, stageId int, sprintId string, session *mgo.Session,
+func DeleteStageSprint(id string, stageID int, sprintID string, session *mgo.Session,
 	dbName string, tableName string) error{
 	
 	var updateStage Stage
@@ -175,7 +180,7 @@ func DeleteStageSprint(id string, stageId int, sprintId string, session *mgo.Ses
 		fmt.Println(err)
 	}
 	sprints := updateStage.Sprints
-	index := FindStageSprint(sprints, sprintId)
+	index := FindStageSprint(sprints, sprintID)
 	if (len(sprints) == 1 && index == 0){
 		updateStage.Sprints = emptySprints
 	} else {
@@ -203,21 +208,21 @@ func FindStageSprint(sprints []Sprint, id string) int {
 	return index
 }
 
-func UpdateStageSprint(stageId int, sprintId string, sprintNew Sprint, session *mgo.Session,
+func UpdateStageSprint(stageID int, sprintID string, sprintNew Sprint, session *mgo.Session,
 	dbName string, tableName string) error{
 	
 	var updateStage Stage
 	defer session.Close()
 	
 	collection := session.DB(dbName).C(tableName)
-	err := collection.Find(bson.M{"id": stageId}).One(&updateStage)
+	err := collection.Find(bson.M{"id": stageID}).One(&updateStage)
 	if err != nil {
 		fmt.Println(err)
 	}
 	sprints := updateStage.Sprints
-	index := FindStageSprint(sprints, sprintId)
+	index := FindStageSprint(sprints, sprintID)
 	updateStage.Sprints[index] = sprintNew
-	if err := collection.Update(bson.M{"id": stageId}, updateStage); err != nil {
+	if err := collection.Update(bson.M{"id": stageID}, updateStage); err != nil {
 		fmt.Println(err)
 		return err
 	} else {

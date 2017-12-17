@@ -13,6 +13,12 @@ Software for road race events of cycling.
 - `go get gopkg.in/square/go-jose.v2`
 - `go get github.com/auth0-community/go-auth0`
 - `go get -u github.com/cweill/gotests/...`
+- `go get github.com/nickng/dingo-hunter`
+- `go get -u github.com/kisielk/errcheck`
+- `go get honnef.co/go/tools/cmd/staticcheck`
+- `go get -u github.com/golang/lint/golint`
+-  `go get github.com/rs/cors`
+
 
 ### Run tests
 `go test -o tests`

@@ -26,11 +26,11 @@ type Events []Event
 var DATABASE = "toyger"
 var EVENTS = "events"
 
-func CreateEvent(e Event, session *mgo.Session, dbName string, dbTable string) Event {
+func CreateEvent(e Event, session *mgo.Session, dbName string, dbTable string) (Event, error) {
 
 	var event Event
 	defer session.Close() 
-
+	var err error
 	event.ID = uuid.NewV4().String()
 	event.Name = e.Name
 	event.NoParticipants = e.NoParticipants
@@ -45,13 +45,14 @@ func CreateEvent(e Event, session *mgo.Session, dbName string, dbTable string) E
 	
 	
 	collection := session.DB(dbName).C(dbTable)
-	if err := collection.Insert(event); err != nil {
-		fmt.Println(err)
+	if err3 := collection.Insert(event); err3 != nil {
+		fmt.Println(err3)
+		err = err3
 	}
-	return event
+	return event, err
 }
 
-func GetEventsList(session *mgo.Session, dbName string, tableName string) Events {
+func GetEventsList(session *mgo.Session, dbName string, tableName string) (Events, error) {
 	
 	events := Events{}
 	defer session.Close()
@@ -60,10 +61,10 @@ func GetEventsList(session *mgo.Session, dbName string, tableName string) Events
 	if err != nil {
 		fmt.Println(err)
 	}
-	return events
+	return events, err
 }
 
-func GetEvent(id string, session *mgo.Session, dbName string, tableName string) Event {
+func GetEvent(id string, session *mgo.Session, dbName string, tableName string) (Event, error) {
 	
 	var e Event
 	defer session.Close()
@@ -72,10 +73,10 @@ func GetEvent(id string, session *mgo.Session, dbName string, tableName string) 
 	if err != nil {
 		fmt.Println(err)
 	}
-	return e
+	return e, err
 }
 
-func UpdateEvent(id string, e Event, session *mgo.Session, dbName string, tableName string) Event {
+func UpdateEvent(id string, e Event, session *mgo.Session, dbName string, tableName string) (Event, error) {
 	
 	var updateEvent Event
 
@@ -86,6 +87,7 @@ func UpdateEvent(id string, e Event, session *mgo.Session, dbName string, tableN
 	err := collection.Find(bson.M{"id": id}).One(&updateEvent)
 	if err != nil {
 		fmt.Println(err)
+		return updateEvent, err
 	}
 
 	updateEvent.Name = e.Name
@@ -99,11 +101,12 @@ func UpdateEvent(id string, e Event, session *mgo.Session, dbName string, tableN
 	updateEvent.Participants = e.Participants
 	updateEvent.Commissaires = e.Commissaires
 
-	if err := collection.Update(bson.M{"id": id}, updateEvent); err != nil {
-		fmt.Println(err)
+	if err1 := collection.Update(bson.M{"id": id}, updateEvent); err1 != nil {
+		fmt.Println(err1)
+		err = err1
 	}
 	
-	return updateEvent
+	return updateEvent, err
 }
 
 func DeleteEvent(id string, session *mgo.Session, dbName string, tableName string) error {
@@ -172,7 +175,7 @@ func InsertEventParticipants(id string, riderId int, session *mgo.Session,
 	return nil
 }
 
-func InsertEventCommissaire(id string, comId string, session *mgo.Session,
+func InsertEventCommissaire(id string, comID string, session *mgo.Session,
 							dbName string, tableName string) error {
 	
 	var updatedEvent Event
@@ -184,7 +187,7 @@ func InsertEventCommissaire(id string, comId string, session *mgo.Session,
 		return err
 	}
 	commissaires := updatedEvent.Commissaires
-	newComm := append(commissaires, comId)
+	newComm := append(commissaires, comID)
 	updatedEvent.Commissaires = newComm
 	if err := collection.Update(bson.M{"id": id}, updatedEvent); err != nil {
 		return err
@@ -192,7 +195,7 @@ func InsertEventCommissaire(id string, comId string, session *mgo.Session,
 	return nil
 }
 
-func InsertEventStages(id string, stageId int, session *mgo.Session,
+func InsertEventStages(id string, stageID int, session *mgo.Session,
 						dbName string, tableName string) error {
 	
 	var updatedEvent Event
@@ -204,7 +207,7 @@ func InsertEventStages(id string, stageId int, session *mgo.Session,
 		return err
 	}
 	stages := updatedEvent.Stages
-	newStages := append(stages, stageId)
+	newStages := append(stages, stageID)
 	updatedEvent.Stages = newStages
 	if err := collection.Update(bson.M{"id": id}, updatedEvent); err != nil {
 		return err
@@ -242,7 +245,7 @@ func DeleteEventParticipant(id string, riderId int, session *mgo.Session,
 	}
 }
 
-func DeleteEventCommissaire(id string, comId string, session *mgo.Session,
+func DeleteEventCommissaire(id string, comID string, session *mgo.Session,
 		dbName string, tableName string) error{
 	
 	var updateEvent Event
@@ -255,7 +258,7 @@ func DeleteEventCommissaire(id string, comId string, session *mgo.Session,
 		fmt.Println(err)
 	}
 	commissaires := updateEvent.Commissaires
-	index := FindEventCommissaires(commissaires, comId)
+	index := FindEventCommissaires(commissaires, comID)
 	if (len(commissaires) == 1 && index == 0){
 		updateEvent.Commissaires = emptyCom
 	} else {
@@ -272,7 +275,7 @@ func DeleteEventCommissaire(id string, comId string, session *mgo.Session,
 	}
 }
 
-func DeleteEventStage(id string, stageId int, session *mgo.Session,
+func DeleteEventStage(id string, stageID int, session *mgo.Session,
 						dbName string, tableName string) error{
 	
 	var updateEvent Event
@@ -285,7 +288,7 @@ func DeleteEventStage(id string, stageId int, session *mgo.Session,
 		fmt.Println(err)
 	}
 	stages := updateEvent.Stages
-	index := FindEventStage(stages, stageId)
+	index := FindEventStage(stages, stageID)
 	if (len(stages) == 1 && index == 0){
 		updateEvent.Stages = emptyStage
 	} else {

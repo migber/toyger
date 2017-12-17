@@ -30,7 +30,7 @@ func connection() (*mgo.Session){
 		Database: db.Database,
 		Username: db.Username,
 		Password: db.Password,
-	}	
+	}
 
 	mongoSession, err := mgo.DialWithInfo(mongoDBDialInfo)
 	if err != nil {

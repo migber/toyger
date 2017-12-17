@@ -11,8 +11,8 @@ import (
 )
 
 const TESTING = "toygertesting"
-const globalEventId = "33baff49-23a3-40bd-ad5a-f2913865e505"
-var deleteEventId string
+const globaleventID = "33baff49-23a3-40bd-ad5a-f2913865e505"
+var deleteeventID string
 
 func ConnectionTesting() *mgo.Session {
 
@@ -53,7 +53,7 @@ func TestEventCreateMethod(t *testing.T){
 	event.Commissaires = []string{}
 
 	createdEvent := m.CreateEvent(event, ConnectionTesting(), TESTING, EVENTS)
-	deleteEventId = createdEvent.ID
+	deleteeventID = createdEvent.ID
 	found := m.GetEvent(createdEvent.ID, ConnectionTesting(), TESTING, EVENTS)
 	if (found.Name != event.Name){
 		t.Error("Should be the same event name")
@@ -72,7 +72,7 @@ func TestEventGetList(t *testing.T) {
 func TestEventUpdate(t *testing.T){
 	
 	fmt.Println("TESTING: EVENT UPDATE")
-	foundEvent := m.GetEvent(deleteEventId, ConnectionTesting(), TESTING, EVENTS)
+	foundEvent := m.GetEvent(deleteeventID, ConnectionTesting(), TESTING, EVENTS)
 	beforeLocation := foundEvent.Location
 	foundEvent.Location = "New event location"
 	updatedEvent := m.UpdateEvent(foundEvent.ID, foundEvent, ConnectionTesting(), TESTING, EVENTS)
@@ -84,11 +84,11 @@ func TestEventUpdate(t *testing.T){
 func TestEventParticipantInsertion(t *testing.T){
 	fmt.Println("TESTING: EVENT PARTICIPANT INSERT INSIDE")
 	riderNo:= 100
-	err := m.InsertEventParticipants(deleteEventId, riderNo, ConnectionTesting(), TESTING, EVENTS)
+	err := m.InsertEventParticipants(deleteeventID, riderNo, ConnectionTesting(), TESTING, EVENTS)
 	if err != nil{
 		t.Error("Should update Participants list in event")
 	}
-	getEvent := m.GetEvent(deleteEventId, ConnectionTesting(), TESTING, EVENTS)
+	getEvent := m.GetEvent(deleteeventID, ConnectionTesting(), TESTING, EVENTS)
 	index := m.FindEventsParticipant(getEvent.Participants, riderNo)
 	if(getEvent.Participants[index] != riderNo){
 		t.Error("Should found inserted rider")
@@ -98,11 +98,11 @@ func TestEventParticipantInsertion(t *testing.T){
 func TestEventParticipantDeletion(t *testing.T){
 	fmt.Println("TESTING: EVENT PARTICIPANT DELETE INSIDE")
 	riderNo:= 100
-	err := m.DeleteEventParticipant(deleteEventId, riderNo, ConnectionTesting(), TESTING, EVENTS)
+	err := m.DeleteEventParticipant(deleteeventID, riderNo, ConnectionTesting(), TESTING, EVENTS)
 	if err != nil{
 		t.Error("Should update Participants list in event")
 	}
-	getEvent := m.GetEvent(deleteEventId, ConnectionTesting(), TESTING, EVENTS)
+	getEvent := m.GetEvent(deleteeventID, ConnectionTesting(), TESTING, EVENTS)
 	index := m.FindEventsParticipant(getEvent.Participants, riderNo)
 	if(index != -1){
 		t.Error("Should not found rider")
@@ -111,27 +111,27 @@ func TestEventParticipantDeletion(t *testing.T){
 
 func TestEventCommissaireInsertion(t *testing.T){
 	fmt.Println("TESTING: EVENT COMMISSAIRE INSERT INSIDE")
-	commissaireId:= "12345678912"
-	err := m.InsertEventCommissaire(deleteEventId, commissaireId, ConnectionTesting(), TESTING, EVENTS)
+	commissaireID:= "12345678912"
+	err := m.InsertEventCommissaire(deleteeventID, commissaireID, ConnectionTesting(), TESTING, EVENTS)
 	if err != nil{
 		t.Error("Should update Commissaires list in event")
 	}
-	getEvent := m.GetEvent(deleteEventId, ConnectionTesting(), TESTING, EVENTS)
-	index := m.FindEventCommissaires(getEvent.Commissaires, commissaireId)
-	if(getEvent.Commissaires[index] != commissaireId){
+	getEvent := m.GetEvent(deleteeventID, ConnectionTesting(), TESTING, EVENTS)
+	index := m.FindEventCommissaires(getEvent.Commissaires, commissaireID)
+	if(getEvent.Commissaires[index] != commissaireID){
 		t.Error("Should found inserted commissaire")
 	}
 }
 
 func TestEventCommissaireDeletion(t *testing.T){
 	fmt.Println("TESTING: EVENT COMMISSAIRE DELETE INSIDE")
-	commissaireId:= "12345678912"
-	err := m.DeleteEventCommissaire(deleteEventId, commissaireId, ConnectionTesting(), TESTING, EVENTS)
+	commissaireID:= "12345678912"
+	err := m.DeleteEventCommissaire(deleteeventID, commissaireID, ConnectionTesting(), TESTING, EVENTS)
 	if err != nil{
 		t.Error("Should update Commissaires list in event")
 	}
-	getEvent := m.GetEvent(deleteEventId, ConnectionTesting(), TESTING, EVENTS)
-	index := m.FindEventCommissaires(getEvent.Commissaires, commissaireId)
+	getEvent := m.GetEvent(deleteeventID, ConnectionTesting(), TESTING, EVENTS)
+	index := m.FindEventCommissaires(getEvent.Commissaires, commissaireID)
 	if(index!= -1){
 		t.Error("Should not found commissaire")
 	}
@@ -140,11 +140,11 @@ func TestEventCommissaireDeletion(t *testing.T){
 func TestEventStagesInsertion(t *testing.T){
 	fmt.Println("TESTING: EVENT STAGE INSERT INSIDE")
 	stageNr:= 3
-	err := m.InsertEventStages(deleteEventId, stageNr, ConnectionTesting(), TESTING, EVENTS)
+	err := m.InsertEventStages(deleteeventID, stageNr, ConnectionTesting(), TESTING, EVENTS)
 	if err != nil{
 		t.Error("Should update Stages list in event")
 	}
-	getEvent := m.GetEvent(deleteEventId, ConnectionTesting(), TESTING, EVENTS)
+	getEvent := m.GetEvent(deleteeventID, ConnectionTesting(), TESTING, EVENTS)
 	index := m.FindEventStage(getEvent.Stages, stageNr)
 	if(getEvent.Stages[index] != stageNr ){
 		t.Error("Should found inserted stage")
@@ -154,11 +154,11 @@ func TestEventStagesInsertion(t *testing.T){
 func TestEventStagesDeletion(t *testing.T){
 	fmt.Println("TESTING: EVENT STAGE DELETE INSIDE")
 	stageNr:= 2
-	err := m.DeleteEventStage(deleteEventId, stageNr, ConnectionTesting(), TESTING, EVENTS)
+	err := m.DeleteEventStage(deleteeventID, stageNr, ConnectionTesting(), TESTING, EVENTS)
 	if err != nil{
 		t.Error("Should update Stages list in event")
 	}
-	getEvent := m.GetEvent(deleteEventId, ConnectionTesting(), TESTING, EVENTS)
+	getEvent := m.GetEvent(deleteeventID, ConnectionTesting(), TESTING, EVENTS)
 	index := m.FindEventStage(getEvent.Stages, stageNr)
 	if(index != -1){
 		t.Error("Should not found stage")
@@ -168,7 +168,7 @@ func TestEventStagesDeletion(t *testing.T){
 func TestEventDelete(t *testing.T){
 
 	fmt.Println("TESTING: EVENT DELETE INSIDE")
-	err := m.DeleteEvent(deleteEventId, ConnectionTesting(), TESTING, EVENTS)
+	err := m.DeleteEvent(deleteeventID, ConnectionTesting(), TESTING, EVENTS)
 	
 	if (err != nil){
 		t.Error("Should delete specified event")
