@@ -18,6 +18,7 @@ Software for road race events of cycling.
 - `go get honnef.co/go/tools/cmd/staticcheck`
 - `go get -u github.com/golang/lint/golint`
 -  `go get github.com/rs/cors`
+- `go get github.com/auth0/go-jwt-middleware`
 
 
 ### Run tests

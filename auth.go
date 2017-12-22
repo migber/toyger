@@ -30,6 +30,7 @@ func checkJwt(w http.ResponseWriter, r *http.Request) bool {
   validator := auth0.NewValidator(configuration)
 
   _, err := validator.ValidateRequest(r)
+  fmt.Println(err)
 
   if err != nil {
     fmt.Println("Token is not valid or missing token")

@@ -59,7 +59,7 @@ func CreateCyclistAlone(c Cyclist, session *mgo.Session, dbName string, tableNam
 	
 	var cyclist Cyclist
 	defer session.Close() 
-
+	fmt.Println(c)
 	 existsCyclist := GetCyclistInsideAlone(c.UCIID, session, dbName, tableName)
 	 fmt.Println(existsCyclist)
 	var err error
@@ -67,8 +67,8 @@ func CreateCyclistAlone(c Cyclist, session *mgo.Session, dbName string, tableNam
 		cyclist.UCIID = c.UCIID
 		cyclist.Name = c.Name
 		cyclist.Surname = c.Surname
-		cyclist.Team = c.Team
-		cyclist.Coaches = c.Coaches
+		// cyclist.Team = c.Team
+		// cyclist.Coaches = c.Coaches
 		cyclist.Birthdate = c.Birthdate
 		cyclist.Gender = c.Gender
 		cyclist.UCICategory = c.UCICategory
@@ -246,7 +246,8 @@ func DeleteCyclist(teamId string, uid string, session *mgo.Session, dbName strin
 func DeleteCyclistAlone(uid string, session *mgo.Session, dbName string, tableName string) error {
 	
 		defer session.Close()
-		
+		fmt.Println("CIAA")
+		fmt.Println(uid)
 		collection := session.DB(dbName).C(tableName)
 		err := collection.Remove(bson.M{"uciid": uid})
 		if err != nil {

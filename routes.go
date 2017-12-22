@@ -49,9 +49,21 @@ var routes = Routes {
 	},
 	Route{
 		"DeleteTeam",
+		"GET",
+		"/api/teams/{teamId}/delete",
+		TeamDeleteHandler,
+	},
+	Route{
+		"DeleteTeam",
 		"DELETE",
 		"/api/teams/{teamId}",
 		TeamDeleteHandler,
+	},
+	Route{
+		"UpdateTeam",
+		"POST",
+		"/api/teams/{teamId}/update",
+		TeamUpdateHandler,
 	},
 	Route{
 		"UpdateTeam",
@@ -81,14 +93,14 @@ var routes = Routes {
 	},
 	Route{
 		"CyclistAloneDelete",
-		"DELETE",
-		"/api/cyclists/{cyclistId}",
+		"GET",
+		"/api/cyclists/{cyclistId}/delete",
 		CyclistsAloneDeleteHandler,
 	},
 	Route{
 		"CyclistAloneUpdate",
-		"PUT",
-		"/api/cyclists/{cyclistId}",
+		"POST",
+		"/api/cyclists/{cyclistId}/update",
 		CyclistAloneUpdateHandler,
 	},
 
@@ -145,14 +157,14 @@ var routes = Routes {
 	},
 	Route{
 		"CommissaireDelete",
-		"DELETE",
-		"/api/commissaires/{commissaireID}",
+		"GET",
+		"/api/commissaires/{commissaireID}/delete",
 		CommissaireDeleteHandler,
 	},
 	Route{
 		"CommissaireUpdate",
-		"PUT",
-		"/api/commissaires/{commissaireID}",
+		"POST",
+		"/api/commissaires/{commissaireID}/update",
 		CommissaireUpdateHandler,
 	},
 
@@ -209,14 +221,14 @@ var routes = Routes {
 	},
 	Route{
 		"EventDelete",
-		"DELETE",
-		"/api/events/{eventID}",
+		"GET",
+		"/api/events/{eventID}/delete",
 		EventDeleteHandler,
 	},
 	Route{
 		"EventUpdate",
-		"PUT",
-		"/api/events/{eventID}",
+		"POST",
+		"/api/events/{eventID}/update",
 		EventUpdateHandler,
 	},
 
